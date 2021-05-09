@@ -18,9 +18,14 @@ impl Controller {
     }
     fn add(&mut self, source: Source<'static>) {
         match self.timing.delay {
-            x if x > 0 && self.offsets.len() > 0 => {
-                let u: u32 = self.offsets[self.offsets.len()-1] + x;
-                self.offsets.push(u);
+            x if x > 0 => match self.offsets.len() {
+                0 => {
+                    self.offsets.push(0);
+                },
+                y => {
+                    let u: u32 = self.offsets[y-1] + x;
+                    self.offsets.push(u);
+                }
             },
             _ => {
                 self.offsets.push(0);
