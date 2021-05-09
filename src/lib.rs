@@ -1,10 +1,7 @@
-mod validator;
 mod endpoint;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-  fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+mod resolver;
+mod validator;
+mod keystore;
+mod timing;
+mod source;
+mod control;

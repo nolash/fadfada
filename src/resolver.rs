@@ -1,5 +1,7 @@
 use std::fmt;
-use super::type;
+
+pub type Digest = Vec<u8>;
+pub type Signature = Vec<u8>;
 
 pub struct ResolverError;
 
@@ -20,19 +22,16 @@ pub trait Resolver {
     fn signature(&self) -> Result<Signature, ResolverError>;
 }
 
-pub struct Sha256ImmutableResolver {
-    key: Vec<u8>,
-    content: Vec<u8>,
+pub struct Sha256ImmutableResolver<'a> {
+    pub key: &'a Vec<u8>,
+    pub content: &'a Vec<u8>,
 }
 
-impl Resolver for Sha256ImmutableResolver {
+impl<'a> Resolver for Sha256ImmutableResolver<'a> {
     fn digest(&self) -> Result<Digest, ResolverError> {
         Ok(Vec::new())     
     }
     fn signature(&self) -> Result<Digest, ResolverError> {
         Ok(Vec::new())     
-    }
-    fn verify(&self, digest: &Digest, signature: &Signature) -> bool {
-        true
     }
 }
