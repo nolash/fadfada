@@ -38,8 +38,15 @@ impl Controller {
 impl fmt::Display for Controller {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         self.sources.iter().enumerate().for_each(|(i, s)| {
-            s.endpoints.iter().for_each(|e| {
-                write!(f, "{} {} {}\n", i, self.offsets[i], e);
+            s.endpoints.iter().enumerate().for_each(|(j, e)| {
+                let mut offset: u32 = self.offsets[i];
+                match &s.timing {
+                    Some(x) => {
+                        offset += x.delay * (j as u32);
+                    },
+                    None => {},
+                }
+                write!(f, "{} {} {} {}\n", i, j, offset, e);
             });
         });
         Ok(())
@@ -60,16 +67,26 @@ mod tests {
         let p: u16 = 443;
         let ea: Endpoint = Endpoint::new("https", "foo.com", &p, None, None);
         let eb: Endpoint = Endpoint::new("https", "bar.com", &p, Some("baz"), None);
+        let ua: Scheduler = Scheduler {
+            delay: 10,
+            timeout: 2000,
+        };
+        let ub: Scheduler = Scheduler {
+            delay: 20,
+            timeout: 2000,
+        };
         let sa: Source = Source{
             trusted_keys: vec!(),
             endpoints: vec!(ea, eb),
-            timing: None,
+            //timing: None,
+            timing: Some(ua),
         };
         let ec: Endpoint = Endpoint::new("http", "xyzzy.com", &p, None, None);
         let sb: Source = Source{
             trusted_keys: vec!(),
             endpoints: vec!(ec),
-            timing: None,
+            //timing: None,
+            timing: Some(ub),
         };
         let u: Scheduler = Scheduler {
             delay: 300,
