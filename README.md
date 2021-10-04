@@ -7,6 +7,13 @@ It allows the user to define a prioritized sequence of network endpoints to requ
 When a single endpoint returns a result, all other active requests are by default cancelled.
 
 
+## Use cases
+
+Fadafada is especially designed for developers and applications tha wish to gradually transition to permissionless decentralized storage.
+
+It allows actual integration with web3 storage, while still keeping the other foot in the world of web2.
+
+
 ## The cast
 
 - **timing**: A simple structure defining a time offset and timeout.
