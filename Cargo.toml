@@ -1,5 +1,5 @@
 [package]
-name = "promisc"
+name = "fadafada"
 version = "0.0.1-alpha.1"
 authors = ["nolash <dev@holbrook.no>"]
 edition = "2018"
@@ -10,3 +10,4 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
+itertools = "0.8.2"

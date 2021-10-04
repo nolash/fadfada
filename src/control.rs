@@ -1,6 +1,79 @@
+use std::fmt;
+use std::collections::HashMap;
+use itertools::Itertools;
+
 use super::source::Source;
 use super::timing::Scheduler;
-use std::fmt;
+use super::endpoint::Endpoint;
+
+pub struct ControllerGraph {
+    v: HashMap<u64, String>,
+    it: Vec<u64>,
+    cursor: u16,
+}
+
+impl ControllerGraph {
+    pub fn new() -> ControllerGraph {
+        ControllerGraph{
+            v: HashMap::new(),
+            cursor: 0,
+            it: Vec<u64>::new(),
+        }
+    }
+    pub fn add(&mut self, d: u64, e: String) {
+        let mut r: bool = false;
+        let mut offset: u64 = d * 1000;
+
+        while r {
+            match self.v.entry(offset) {
+                x => {
+                    offset += 1;
+                },
+                _ => {
+                   r = false;
+                },
+            }
+        }
+        self.v.insert(offset, e);
+    }
+
+    pub fn get_by_offset(&self, d: u64) {
+        
+    }
+}
+
+impl Iterator for ControllerGraph {
+    type Item = u64;
+
+    fn next(&self) -> Option<u64> {
+        match self.it {
+            None => {
+                self.it = self.v.keys();
+                self.it = self.it.sorted();
+            }
+            _ => {},
+        }
+        match self.v.get(self.cursor) {
+            Some(x) => {
+                self.cursor += 1;
+                return x as i64;
+            },
+            None => {
+                Some(-1)
+            },
+        }
+    }
+}
+
+impl fmt::Display for ControllerGraph {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        // consider tradeoffs against BtreeMap; which is faster for a single sort?
+        self.it.for_each(|k| {
+           write!(f, "{} {}\n", k, self.v.get(k).unwrap()); 
+        });
+        Ok(())
+    }
+}
 
 pub struct Controller {
     sources: Vec<Source<'static>>,
@@ -33,25 +106,31 @@ impl Controller {
         }
         self.sources.push(source);
     }
-}
 
-impl fmt::Display for Controller {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn generate(&mut self, pointer: &String) -> ControllerGraph {
+        let mut g: ControllerGraph = ControllerGraph::new();
         self.sources.iter().enumerate().for_each(|(i, s)| {
             s.endpoints.iter().enumerate().for_each(|(j, e)| {
-                let mut offset: u32 = self.offsets[i];
+                let mut offset: u32 = self.offsets[i] as u32;
                 match &s.timing {
                     Some(x) => {
                         offset += x.delay * (j as u32);
+                        g.add(offset as u64, e.url_for(pointer));
                     },
                     None => {},
                 }
-                write!(f, "{} {} {} {}\n", i, j, offset, e);
+               // write!(f, "{} {} {} {}\n", i, j, offset, e);
             });
         });
-        Ok(())
+        g 
     }
 }
+
+//impl fmt::Display for Controller {
+//    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+//
+//    }
+//}
 
 #[cfg(test)]
 mod tests {
@@ -59,6 +138,7 @@ mod tests {
         Source,
         Controller,
         Scheduler,
+        ControllerGraph,
     };
     use crate::endpoint::Endpoint;
     
@@ -95,6 +175,9 @@ mod tests {
         let mut c: Controller = Controller::new(u);
         c.add(sa);
         c.add(sb);
-        println!("{}", c);
+      
+        let ptr: String = "foo".to_string();
+        let g: ControllerGraph = c.generate(&ptr);
+        println!("{}", g);
     }
 }

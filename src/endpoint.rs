@@ -26,6 +26,17 @@ impl<'a> Endpoint<'a> {
         }
         e
     }
+
+    pub fn url_for(&self, pointer: &String) -> String {
+        match &self.path {
+            x if x.is_empty() => {
+                format!("{}://{}:{}/{}", self.protocol, self.host, self.port, pointer)
+            },
+            _ => {
+                format!("{}://{}:{}/{}/{}", self.protocol, self.host, self.port, self.path, pointer)
+            },
+        }
+    }
 }
 
 impl<'a> fmt::Display for Endpoint<'a> {
