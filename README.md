@@ -32,7 +32,7 @@ In its initial form, all endpoints will be queried for the same resource identif
 If different resource identifiers exist for the same resource, individual groups of endpoints may define their own resolver to perform the necessary reference translation.
 
 
-### Example
+## Example
 
 Image `I` is looked up on two endpoint `group`s:
 

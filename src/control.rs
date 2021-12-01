@@ -17,7 +17,7 @@ impl ControllerGraph {
         ControllerGraph{
             v: HashMap::new(),
             cursor: 0,
-            it: Vec<u64>::new(),
+            it: Vec::<u64>::new(),
         }
     }
     pub fn add(&mut self, d: u64, e: String) {
@@ -43,23 +43,28 @@ impl ControllerGraph {
 }
 
 impl Iterator for ControllerGraph {
-    type Item = u64;
+    //type Item = u64;
+    type Item = String;
 
-    fn next(&self) -> Option<u64> {
-        match self.it {
-            None => {
-                self.it = self.v.keys();
-                self.it = self.it.sorted();
-            }
+    fn next(&mut self) -> Option<String> {
+        match self.it.len() {
+            0 => {
+                self.it = Vec::<u64>::new();
+                for k in self.v.keys() {
+                    self.it.push(*k);
+                }
+                self.it.sort();
+            },
             _ => {},
         }
-        match self.v.get(self.cursor) {
+        let i: u64 = self.cursor as u64;
+        match self.v.get(&i) {
             Some(x) => {
                 self.cursor += 1;
-                return x as i64;
+                return Some(x.to_string());
             },
             None => {
-                Some(-1)
+                None
             },
         }
     }
@@ -68,7 +73,7 @@ impl Iterator for ControllerGraph {
 impl fmt::Display for ControllerGraph {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         // consider tradeoffs against BtreeMap; which is faster for a single sort?
-        self.it.for_each(|k| {
+        self.it.iter().for_each(|k| {
            write!(f, "{} {}\n", k, self.v.get(k).unwrap()); 
         });
         Ok(())
