@@ -2,8 +2,20 @@ use super::keystore::{Fingerprint};
 use super::timing::{Scheduler};
 use super::endpoint::{Endpoint};
 
+/// The [Engine] is use as a lookup key for resources for a particular [Source] backend.
+///
+/// For example it is used to retrieve a pointers from a [Resolver](crate::resolver::Resolver) to
+/// build [Endpoint]  URLs.
 pub type Engine = String;
 
+/// [Source] encapsulates one or more endpoints to access content using a particular storage
+/// backend [Engine].
+///
+/// A [Scheduler] may also be included to define with what delay endpoints should be queried in
+/// sequence. 
+///
+/// Lastly, an array of public keys or public key digests may be provided to verify the origin of
+/// the content.
 pub struct Source<'a> {
     pub trusted_keys: Vec<Fingerprint>,
     pub endpoints: Vec<Endpoint<'a>>,

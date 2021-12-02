@@ -1,6 +1,10 @@
 use super::resolver::{Resolver, Digest, Signature};
 
+/// The [Validator] is optionally used with a result from a [Source](crate:.source::Source) to verify the origin of
+/// content.
 pub trait Validator {
+
+    /// Returns `true` if [Signature] can be verified against the [Digest] of content.
     fn verify(&self, digest: &Digest, signature: &Signature) -> bool;
 }
 
@@ -14,6 +18,7 @@ impl<'a> Validator for Sha256ImmutableValidator<'a> {
     }
 }
 
+/// The default value of [Validator], which performs no validation.
 pub struct NoopValidator {
 }
 

@@ -5,9 +5,18 @@ use super::source::Source;
 use super::timing::Scheduler;
 use super::endpoint::Endpoint;
 
-mod graph;
+pub mod graph;
 use graph::ControllerGraph;
 
+/// Controller defines the order and scheduling of how a collection of sources are
+/// queried for content.
+///
+/// If a delay is defined in the schedule, the same delay will apply to every added source.
+///
+/// Each [Source] in turn defines its own delay applied to every [Endpoint] it contains.
+///
+/// Once a controller has been populated, it can be used to generate [ControllerGraph] instances,
+/// which in turn can be used with a query engine to control the execution of a single query.
 pub struct Controller {
     sources: Vec<Source<'static>>,
     timing: Scheduler,
@@ -22,6 +31,10 @@ impl Controller {
             timing: scheduler,
         }
     }
+
+    /// Add a source to the request collection.
+    ///
+    /// Sources will be requested in the order they were added.
     fn add(&mut self, source: Source<'static>) {
         match self.timing.delay {
             x if x > 0 => match self.offsets.len() {
@@ -40,6 +53,7 @@ impl Controller {
         self.sources.push(source);
     }
 
+    /// Generate a [ControllerGraph] from the current state of the [Controller].
     fn generate(&mut self, pointer: &String) -> ControllerGraph {
         let mut g: ControllerGraph = ControllerGraph::new();
         self.sources.iter().enumerate().for_each(|(i, s)| {

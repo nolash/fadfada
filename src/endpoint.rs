@@ -1,10 +1,13 @@
 use std::fmt;
-use super::validator::{Validator, noopValidator};
+use crate::validator::{
+    Validator,
+    noopValidator,
+};
 
-/// Endpoint represents a single access point of a specific source, to be accessed according to the
+/// [Endpoint] represents a single access point of a specific source, to be accessed according to the
 /// source-specific schedule.
 /// 
-/// An endpoint also includes a validator, which will verify that content retrieved from the
+/// An endpoint also includes a [Validator], which will verify that content retrieved from the
 /// endpoint is valid.
 pub struct Endpoint<'a> {
     /// The protocol corresponding to the endpoint
@@ -42,7 +45,7 @@ impl<'a> Endpoint<'a> {
     ///
     /// The endpoint will typically be the string representation of a digest.
     ///
-    /// TODO: pointer should probably be of digest, or a dedicated type for reference,
+    /// TODO: pointer should probably be of [Digest](crate::resolver::Digest), or a dedicated type for reference,
     pub fn url_for(&self, pointer: &String) -> String {
         match &self.path {
             x if x.is_empty() => {

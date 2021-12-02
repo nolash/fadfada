@@ -18,10 +18,17 @@ pub mod endpoint;
 /// Resolves a content resource to the pointer depending on source context.
 pub mod resolver;
 
+/// Validates content after delivery.
+pub mod validator;
 
-mod validator;
-mod keystore;
-mod timing;
+/// Manages keys used for content verification.
+pub mod keystore;
 
+/// Define query schedules for content sources.
+pub mod timing;
+
+/// Represents a storage engine backend, e.g. web2-sha256, swarm, IPFS etc.
 pub mod source;
-mod control;
+
+/// Entry-point object that orchestrates order and timing of requests.
+pub mod control;
