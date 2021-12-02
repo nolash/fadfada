@@ -4,8 +4,8 @@ pub trait Validator {
     fn verify(&self, digest: &Digest, signature: &Signature) -> bool;
 }
 
-pub struct Sha256ImmutableValidator<'a> {
-    pub resolver: &'a dyn Resolver,
+pub struct Sha256ImmutableValidator<'r> {
+    pub resolver: &'r Resolver<'r>,
 }
 
 impl<'a> Validator for Sha256ImmutableValidator<'a> {

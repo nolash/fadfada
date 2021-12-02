@@ -1,11 +1,22 @@
 use std::fmt;
 use super::validator::{Validator, noopValidator};
 
+/// Endpoint represents a single access point of a specific source, to be accessed according to the
+/// source-specific schedule.
+/// 
+/// An endpoint also includes a validator, which will verify that content retrieved from the
+/// endpoint is valid.
 pub struct Endpoint<'a> {
+    /// The protocol corresponding to the endpoint
     pub protocol: String,
+    /// Endpoint host
     pub host: String,
+    /// Endpoint port
     pub port: u16,
+    /// Endpoint path
     pub path: String,
+    /// Content validator for content returned from the endpoint. Enabling endpoint-specific
+    /// validation allows for different signatories for different locations.
     pub validator: &'a (dyn Validator + 'a),
 }
 
@@ -27,6 +38,11 @@ impl<'a> Endpoint<'a> {
         e
     }
 
+    /// Calculates the URL of a resource in the context of the specific endpoint.
+    ///
+    /// The endpoint will typically be the string representation of a digest.
+    ///
+    /// TODO: pointer should probably be of digest, or a dedicated type for reference,
     pub fn url_for(&self, pointer: &String) -> String {
         match &self.path {
             x if x.is_empty() => {
@@ -58,13 +74,14 @@ impl<'a> fmt::Display for Endpoint<'a> {
 mod tests {
     use super::Endpoint;
     use crate::validator::{Sha256ImmutableValidator};
-    use crate::resolver::{Sha256ImmutableResolver};
+    use crate::resolver::{Sha256ImmutableResolver, Resolver};
 
     #[test]
     fn create() {
         let key: Vec<u8> = Vec::new();
         let content: Vec<u8> = Vec::new();
-        let r: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key, content: &content};
+        let r: Resolver = Resolver::new();
+        //let r: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key, content: &content};
         let v: Sha256ImmutableValidator = Sha256ImmutableValidator{resolver: &r};
         let p: u16 = 8080;
         let e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
