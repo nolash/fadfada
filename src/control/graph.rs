@@ -1,6 +1,9 @@
 use std::fmt;
 use std::collections::HashMap;
 
+
+/// Represents the sequence and timings of a single resource request as described by the
+/// [super:control.Controller] state at the time of request.
 pub struct ControllerGraph {
     v: HashMap<u64, String>,
     it: Vec<u64>,
@@ -15,6 +18,8 @@ impl ControllerGraph {
             it_active: false,
         }
     }
+
+    /// Add a new offset/url pair to the graph.
     pub fn add(&mut self, d: u64, e: String) {
         let mut r: bool = false;
         let mut offset: u64 = d * 1000;
@@ -30,10 +35,6 @@ impl ControllerGraph {
             }
         }
         self.v.insert(offset, e);
-    }
-
-    pub fn get_by_offset(&self, d: u64) {
-        
     }
 }
 
