@@ -133,6 +133,9 @@ mod tests {
       
         let ptr: String = "foo".to_string();
         let g: ControllerGraph = c.generate(&ptr);
-        println!("{}", g);
+
+        for v in g {
+            println!(">> {:?}", v);
+        }
     }
 }

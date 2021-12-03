@@ -4,15 +4,15 @@ use std::collections::HashMap;
 pub struct ControllerGraph {
     v: HashMap<u64, String>,
     it: Vec<u64>,
-    cursor: u16,
+    it_active: bool,
 }
 
 impl ControllerGraph {
     pub fn new() -> ControllerGraph {
         ControllerGraph{
             v: HashMap::new(),
-            cursor: 0,
             it: Vec::<u64>::new(),
+            it_active: false,
         }
     }
     pub fn add(&mut self, d: u64, e: String) {
@@ -38,26 +38,25 @@ impl ControllerGraph {
 }
 
 impl Iterator for ControllerGraph {
-    type Item = String;
+    type Item = (u64, String);
 
-    fn next(&mut self) -> Option<String> {
-        match self.it.len() {
-            0 => {
-                self.it = Vec::<u64>::new();
-                for k in self.v.keys() {
-                    self.it.push(*k);
-                }
-                self.it.sort();
-            },
-            _ => {},
+    fn next(&mut self) -> Option<(u64, String)> {
+        if !self.it_active {
+            self.it = Vec::<u64>::new();
+            for k in self.v.keys() {
+                self.it.push(*k);
+            }
+            self.it.sort();
+            self.it.reverse();
+            self.it_active = true;
         }
-        let i: u64 = self.cursor as u64;
-        match self.v.get(&i) {
-            Some(x) => {
-                self.cursor += 1;
-                return Some(x.to_string());
+        match self.it.pop() {
+            Some(i) => {
+                let s = self.v.get(&i).unwrap();
+                Some((i, s.clone()))
             },
             None => {
+                self.it_active = false;
                 None
             },
         }
@@ -67,10 +66,14 @@ impl Iterator for ControllerGraph {
 impl fmt::Display for ControllerGraph {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         // consider tradeoffs against BtreeMap; which is faster for a single sort?
-        self.it.iter().for_each(|k| {
-           write!(f, "{} {}\n", k, self.v.get(k).unwrap()); 
+        self.it.iter().for_each(|v| {
+               match Some(v) {
+                   Some(k) => {
+                       write!(f, "{} {}\n", k, self.v.get(k).unwrap()); 
+                   },
+                   None => {},
+               }
         });
         Ok(())
     }
 }
-
