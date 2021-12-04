@@ -24,7 +24,7 @@ pub struct Controller {
 }
 
 impl Controller {
-    fn new(scheduler: Scheduler) -> Controller {
+    pub fn new(scheduler: Scheduler) -> Controller {
         Controller {
             sources: vec!(),
             offsets: vec!(),
@@ -35,7 +35,7 @@ impl Controller {
     /// Add a source to the request collection.
     ///
     /// Sources will be requested in the order they were added.
-    fn add(&mut self, source: Source<'static>) {
+    pub fn add(&mut self, source: Source<'static>) {
         match self.timing.delay {
             x if x > 0 => match self.offsets.len() {
                 0 => {
@@ -54,8 +54,7 @@ impl Controller {
     }
 
     /// Generate a [ControllerGraph] from the current state of the [Controller].
-    //fn generate(&mut self, pointer: &String) -> ControllerGraph {
-    fn generate(&mut self, resolver: Resolver) -> ControllerGraph {
+    pub fn generate(&mut self, resolver: Resolver) -> ControllerGraph {
         let mut g: ControllerGraph = ControllerGraph::new();
         self.sources.iter().enumerate().for_each(|(i, s)| {
             s.endpoints.iter().enumerate().for_each(|(j, e)| {
@@ -133,6 +132,7 @@ mod tests {
             delay: 6,
             timeout: 2000,
         };
+
         let mut c: Controller = Controller::new(sched_ctrl);
         c.add(source_a);
         c.add(source_b);

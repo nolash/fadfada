@@ -50,7 +50,7 @@ impl fmt::Debug for ResolverError {
 pub trait ResolverItem {
 
     /// Return the digest of the content in the context of the particular backend.
-    fn digest(&self) -> Result<&Digest, ResolverError>;
+    fn digest(&self) -> &Digest;
 
     /// Return the signature data for the content.
     ///
@@ -58,6 +58,10 @@ pub trait ResolverItem {
     /// it is up to the visitor to decide whether a missing signature constitutes validation by
     /// default or not.
     fn signature(&self) -> Result<Signature, ResolverError>;
+
+    /// Return the string representation of the digest in the format expected for building the
+    /// endpoint URL.
+    fn pointer(&self) -> String;
 }
 
 
@@ -72,12 +76,16 @@ pub struct Sha256ImmutableResolver<'a> {
 }
 
 impl<'a> ResolverItem for Sha256ImmutableResolver<'a> {
-    fn digest(&self) -> Result<&Digest, ResolverError> {
-        return Ok(self.key);
+    fn digest(&self) -> &Digest {
+        return self.key;
         //Ok(Vec::new())     
     }
     fn signature(&self) -> Result<Digest, ResolverError> {
         Ok(Vec::new())     
+    }
+    fn pointer(&self) -> String {
+        let v = self.key;
+        return hex::encode(v);
     }
 }
 
@@ -117,9 +125,7 @@ impl<'r> Resolver<'r> {
     pub fn pointer_for(&self, e: &source::Engine) -> Result<String, ResolverError> {
         match self.resolvers.get(e) {
             Some(x) => {
-                let v = x.digest().unwrap();
-                let h = hex::encode(v);
-                Ok(h)
+                Ok(x.pointer())
             },
             None => {
                 let err_detail = ErrorDetail::UnknownEngineError(e.to_string());
@@ -153,11 +159,11 @@ mod tests {
         r.add(engine_string_two.clone(), &ri_two);
 
         let mut ri_returned = r.pointer_for(&engine_string_one).unwrap();
-        let mut ri_orig = ri_one.digest().unwrap();
+        let mut ri_orig = ri_one.digest();
         assert_eq!(hex::encode(ri_orig), ri_returned);
 
         ri_returned = r.pointer_for(&engine_string_two).unwrap();
-        ri_orig = ri_two.digest().unwrap();
+        ri_orig = ri_two.digest();
         assert_eq!(hex::encode(ri_orig), ri_returned);
     }
 }
