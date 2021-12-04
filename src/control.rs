@@ -1,9 +1,9 @@
 use std::fmt;
-use itertools::Itertools;
 
-use super::source::Source;
-use super::timing::Scheduler;
-use super::endpoint::Endpoint;
+use crate::source::Source;
+use crate::timing::Scheduler;
+use crate::endpoint::Endpoint;
+use crate::resolver::Resolver;
 
 pub mod graph;
 use graph::ControllerGraph;
@@ -54,15 +54,17 @@ impl Controller {
     }
 
     /// Generate a [ControllerGraph] from the current state of the [Controller].
-    fn generate(&mut self, pointer: &String) -> ControllerGraph {
+    //fn generate(&mut self, pointer: &String) -> ControllerGraph {
+    fn generate(&mut self, resolver: Resolver) -> ControllerGraph {
         let mut g: ControllerGraph = ControllerGraph::new();
         self.sources.iter().enumerate().for_each(|(i, s)| {
             s.endpoints.iter().enumerate().for_each(|(j, e)| {
                 let mut offset: u32 = self.offsets[i] as u32;
                 match &s.timing {
                     Some(x) => {
+                        let pointer = resolver.pointer_for(&s.engine).unwrap();
                         offset += x.delay * (j as u32);
-                        g.add(offset as u64, e.url_for(pointer));
+                        g.add(offset as u64, e.url_for(&pointer));
                     },
                     None => {},
                 }
@@ -88,6 +90,10 @@ mod tests {
         ControllerGraph,
     };
     use crate::endpoint::Endpoint;
+    use crate::resolver::{
+        Sha256ImmutableResolver,
+        Resolver,
+    };
     
     #[test]
     fn create_graph() {
@@ -99,40 +105,50 @@ mod tests {
         let endpoint_a_one: Endpoint = Endpoint::new("https", "foo.com", &p, None, None);
         let endpoint_a_two: Endpoint = Endpoint::new("https", "bar.com", &p, Some("baz"), None);
         let sched_a: Scheduler = Scheduler {
-            delay: 10,
+            delay: 20,
             timeout: 2000,
         };
         let source_a: Source = Source{
             trusted_keys: vec!(),
             endpoints: vec!(endpoint_a_one, endpoint_a_two),
             timing: Some(sched_a),
-            engine: "sha256".to_string(),
+            engine: "foo".to_string(),
         };
 
         // set up second source with endpoints and schedule
         let endpoint_b_one: Endpoint = Endpoint::new("http", "xyzzy.com", &p, None, None);
         let sched_b: Scheduler = Scheduler {
-            delay: 20,
+            delay: 10,
             timeout: 2000,
         };
         let source_b: Source = Source{
             trusted_keys: vec!(),
             endpoints: vec!(endpoint_b_one),
             timing: Some(sched_b),
-            engine: "sha256".to_string(),
+            engine: "bar".to_string(),
         };
 
         // generate control graph from endpoints and schedules 
         let sched_ctrl: Scheduler = Scheduler {
-            delay: 300,
+            delay: 6,
             timeout: 2000,
         };
         let mut c: Controller = Controller::new(sched_ctrl);
         c.add(source_a);
         c.add(source_b);
       
-        let ptr: String = "foo".to_string();
-        let g: ControllerGraph = c.generate(&ptr);
+        let mut resolver = Resolver::new();
+
+        let key_one: Vec<u8> = vec![1, 2, 3];
+        let ri_one: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_one, content: None};
+        resolver.add("foo".to_string(), &ri_one);
+
+        let key_two: Vec<u8> = vec![4, 5, 6];
+        let ri_two: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_two, content: None};
+        resolver.add("bar".to_string(), &ri_two);
+
+
+        let g: ControllerGraph = c.generate(resolver);
 
         for v in g {
             println!(">> {:?}", v);

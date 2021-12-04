@@ -1,6 +1,8 @@
 use std::fmt;
 use std::collections::HashMap;
 use std::error::Error;
+use std::fmt::LowerHex;
+use hex;
 
 pub type Digest = Vec<u8>;
 pub type Signature = Vec<u8>;
@@ -112,11 +114,12 @@ impl<'r> Resolver<'r> {
     /// Retrieve the [ResolverItem] registered for an [source::Engine].
     /// 
     /// Will error if a record for `Engine` doesn't exist.
-    pub fn get_for(&self, e: source::Engine) -> Result<&Digest, ResolverError> {
-        let item = self.resolvers.get(&e);
-        match item {
+    pub fn pointer_for(&self, e: &source::Engine) -> Result<String, ResolverError> {
+        match self.resolvers.get(e) {
             Some(x) => {
-                return x.digest();
+                let v = x.digest().unwrap();
+                let h = hex::encode(v);
+                Ok(h)
             },
             None => {
                 let err_detail = ErrorDetail::UnknownEngineError(e.to_string());
@@ -149,12 +152,12 @@ mod tests {
         r.add(engine_string_one.clone(), &ri_one);
         r.add(engine_string_two.clone(), &ri_two);
 
-        let mut ri_returned = r.get_for(engine_string_one).unwrap();
+        let mut ri_returned = r.pointer_for(&engine_string_one).unwrap();
         let mut ri_orig = ri_one.digest().unwrap();
-        assert_eq!(ri_orig, ri_returned);
+        assert_eq!(hex::encode(ri_orig), ri_returned);
 
-        ri_returned = r.get_for(engine_string_two).unwrap();
+        ri_returned = r.pointer_for(&engine_string_two).unwrap();
         ri_orig = ri_two.digest().unwrap();
-        assert_eq!(ri_orig, ri_returned);
+        assert_eq!(hex::encode(ri_orig), ri_returned);
     }
 }

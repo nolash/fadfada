@@ -22,7 +22,8 @@ impl ControllerGraph {
     /// Add a new offset/url pair to the graph.
     pub fn add(&mut self, d: u64, e: String) {
         let mut r: bool = false;
-        let mut offset: u64 = d * 1000;
+        //let mut offset: u64 = d * 1000;
+        let mut offset = d;
 
         while r {
             match self.v.entry(offset) {
