@@ -31,14 +31,16 @@ mod tests {
     use super::Endpoint;
     use super::Engine;
     use crate::validator::{Sha256ImmutableValidator};
-    use crate::resolver::{Sha256ImmutableResolver, Resolver};
+
+    use crate::web2::{Sha256ImmutableResolverItem};
+    use crate::resolver::{Resolver};
 
     #[test]
     fn create_source() {
         let key: Vec<u8> = Vec::new();
         let content: Vec<u8> = Vec::new();
         let mut r: Resolver = Resolver::new();
-        let ri: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key, content: None};
+        let ri = Sha256ImmutableResolverItem{key: &key, content: None};
         let engine_string: Engine = "sha256".to_string();
         r.add(engine_string, &ri);
         let v: Sha256ImmutableValidator = Sha256ImmutableValidator{resolver: &r};

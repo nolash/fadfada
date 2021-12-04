@@ -89,10 +89,8 @@ mod tests {
         ControllerGraph,
     };
     use crate::endpoint::Endpoint;
-    use crate::resolver::{
-        Sha256ImmutableResolver,
-        Resolver,
-    };
+    use crate::resolver::Resolver;
+    use crate::web2::Sha256ImmutableResolverItem;
     
     #[test]
     fn create_graph() {
@@ -140,11 +138,11 @@ mod tests {
         let mut resolver = Resolver::new();
 
         let key_one: Vec<u8> = vec![1, 2, 3];
-        let ri_one: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_one, content: None};
+        let ri_one = Sha256ImmutableResolverItem{key: &key_one, content: None};
         resolver.add("foo".to_string(), &ri_one);
 
         let key_two: Vec<u8> = vec![4, 5, 6];
-        let ri_two: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_two, content: None};
+        let ri_two = Sha256ImmutableResolverItem{key: &key_two, content: None};
         resolver.add("bar".to_string(), &ri_two);
 
 

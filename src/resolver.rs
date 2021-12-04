@@ -65,31 +65,6 @@ pub trait ResolverItem {
 }
 
 
-/// The default web2 implementation of `ResolverItem` is the `Sha256ImmutableResolver`. This
-/// resolver holds the `sha256` hash of the content, which is used as both the pointer and the
-/// integrity check of a resource located at a normal web2 HTTP endpoint.
-pub struct Sha256ImmutableResolver<'a> {
-    /// The `sha256` digest of the resource.
-    pub key: &'a Vec<u8>,
-    /// The verbatim content of the resource.
-    pub content: Option<Vec<u8>>,
-}
-
-impl<'a> ResolverItem for Sha256ImmutableResolver<'a> {
-    fn digest(&self) -> &Digest {
-        return self.key;
-        //Ok(Vec::new())     
-    }
-    fn signature(&self) -> Result<Digest, ResolverError> {
-        Ok(Vec::new())     
-    }
-    fn pointer(&self) -> String {
-        let v = self.key;
-        return hex::encode(v);
-    }
-}
-
-
 /// A key-value store of source engine identifiers mapped to `ResolverItem`s.
 ///
 /// If an [source::Engine] to `ResolverItem` mapping exists for a specific resource, then the corresponding
@@ -140,21 +115,43 @@ impl<'r> Resolver<'r> {
 #[cfg(test)]
 mod tests {
     use super::{
-        Sha256ImmutableResolver,
         Resolver,
         ResolverItem,
+        ResolverError,
+        Digest,
+        Signature,
     };
-    use crate::source::{Engine};
+    use crate::source;
+
+    struct TestResolverItem {
+        key: Digest,
+    }
+
+    impl<'r> ResolverItem for TestResolverItem {
+        fn digest(&self) -> &Digest {
+            return &self.key;
+        }
+
+        fn pointer(&self) -> String {
+            return "foo".to_string();
+        }
+
+        fn signature(&self) -> Result<Signature, ResolverError> {
+            Ok(vec![])
+        }
+    }
 
     #[test]
     fn create_resolver() {
         let key_one: Vec<u8> = vec![1, 2, 3];
         let key_two: Vec<u8> = vec![4, 5, 6];
         let mut r: Resolver = Resolver::new();
-        let ri_one: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_one, content: None};
-        let ri_two: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_two, content: None};
-        let engine_string_one: Engine = "one".to_string();
-        let engine_string_two: Engine = "two".to_string();
+        //let ri_one: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_one, content: None};
+        //let ri_two: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_two, content: None};
+        let ri_one = TestResolverItem{key: vec![1,2,3]};
+        let ri_two = TestResolverItem{key: vec![4,5,6]};
+        let engine_string_one: source::Engine = "one".to_string();
+        let engine_string_two: source::Engine = "two".to_string();
         r.add(engine_string_one.clone(), &ri_one);
         r.add(engine_string_two.clone(), &ri_two);
 

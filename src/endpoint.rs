@@ -76,16 +76,13 @@ impl<'a> fmt::Display for Endpoint<'a> {
 #[cfg(test)]
 mod tests {
     use super::Endpoint;
-    use crate::validator::{Sha256ImmutableValidator};
-    use crate::resolver::{Sha256ImmutableResolver, Resolver};
+    use crate::resolver::Resolver;
 
     #[test]
     fn create() {
         let key: Vec<u8> = Vec::new();
         let content: Vec<u8> = Vec::new();
         let r: Resolver = Resolver::new();
-        //let r: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key, content: &content};
-        let v: Sha256ImmutableValidator = Sha256ImmutableValidator{resolver: &r};
         let p: u16 = 8080;
         let e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
         assert_eq!(format!("{}", e), "https://localhost:8080/foo");
