@@ -23,40 +23,39 @@ pub struct Source<'a> {
     pub engine: Engine,
 }
 
-
-#[cfg(test)]
-mod tests {
-    use super::Source;
-    use super::Scheduler;
-    use super::Endpoint;
-    use super::Engine;
-    use crate::validator::{Sha256ImmutableValidator};
-
-    use crate::web2::{Sha256ImmutableResolverItem};
-    use crate::resolver::{Resolver};
-
-    #[test]
-    fn create_source() {
-        let key: Vec<u8> = Vec::new();
-        let content: Vec<u8> = Vec::new();
-        let mut r: Resolver = Resolver::new();
-        let ri = Sha256ImmutableResolverItem{key: &key, content: None};
-        let engine_string: Engine = "sha256".to_string();
-        r.add(engine_string, &ri);
-        let v: Sha256ImmutableValidator = Sha256ImmutableValidator{resolver: &r};
-        let p: u16 = 8080;
-        let e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
-        let h: Scheduler = Scheduler{
-            delay: 42,
-            timeout: 13,
-            };
-        let mut ep: Vec<Endpoint> = Vec::new();
-        ep.push(e);
-        let s: Source = Source{
-            trusted_keys: Vec::new(),
-            endpoints: ep,
-            timing: Some(h),
-            engine: "foo".to_string(),
-        };
-    }
-}
+//#[cfg(test)]
+//mod tests {
+//    use super::Source;
+//    use super::Scheduler;
+//    use super::Endpoint;
+//    use super::Engine;
+//    use crate::validator::{Sha256ImmutableValidator};
+//
+//    use super::test::resolver::{TestResolverItem};
+//    use crate::resolver::{Resolver};
+//
+//    #[test]
+//    fn create_source() {
+//        let key: Vec<u8> = Vec::new();
+//        let content: Vec<u8> = Vec::new();
+//        let mut r: Resolver = Resolver::new();
+//        let ri = TestResolverItem{key: &key, content: None};
+//        let engine_string: Engine = "sha256".to_string();
+//        r.add(engine_string, &ri);
+//        let v: Sha256ImmutableValidator = Sha256ImmutableValidator{resolver: &r};
+//        let p: u16 = 8080;
+//        let e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
+//        let h: Scheduler = Scheduler{
+//            delay: 42,
+//            timeout: 13,
+//            };
+//        let mut ep: Vec<Endpoint> = Vec::new();
+//        ep.push(e);
+//        let s: Source = Source{
+//            trusted_keys: Vec::new(),
+//            endpoints: ep,
+//            timing: Some(h),
+//            engine: "foo".to_string(),
+//        };
+//    }
+//}

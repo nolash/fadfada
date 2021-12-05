@@ -4,6 +4,7 @@ use crate::resolver::{
     Digest,
     ResolverError,
 };
+use hex;
 
 pub fn engine() -> Engine {
     return "web2".to_string();

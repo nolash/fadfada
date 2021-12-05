@@ -33,4 +33,8 @@ pub mod source;
 /// Entry-point object that orchestrates order and timing of requests.
 pub mod control;
 
+#[cfg(feature = "web2")]
 pub mod web2;
+
+#[cfg(test)]
+pub mod mock;

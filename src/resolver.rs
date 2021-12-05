@@ -2,7 +2,6 @@ use std::fmt;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::LowerHex;
-use hex;
 
 pub type Digest = Vec<u8>;
 pub type Signature = Vec<u8>;
@@ -111,9 +110,9 @@ impl<'r> Resolver<'r> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
+    use hex;
     use super::{
         Resolver,
         ResolverItem,
@@ -122,32 +121,13 @@ mod tests {
         Signature,
     };
     use crate::source;
-
-    struct TestResolverItem {
-        key: Digest,
-    }
-
-    impl<'r> ResolverItem for TestResolverItem {
-        fn digest(&self) -> &Digest {
-            return &self.key;
-        }
-
-        fn pointer(&self) -> String {
-            return "foo".to_string();
-        }
-
-        fn signature(&self) -> Result<Signature, ResolverError> {
-            Ok(vec![])
-        }
-    }
+    use crate::mock::{TestResolverItem};
 
     #[test]
     fn create_resolver() {
         let key_one: Vec<u8> = vec![1, 2, 3];
         let key_two: Vec<u8> = vec![4, 5, 6];
         let mut r: Resolver = Resolver::new();
-        //let ri_one: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_one, content: None};
-        //let ri_two: Sha256ImmutableResolver = Sha256ImmutableResolver{key: &key_two, content: None};
         let ri_one = TestResolverItem{key: vec![1,2,3]};
         let ri_two = TestResolverItem{key: vec![4,5,6]};
         let engine_string_one: source::Engine = "one".to_string();
