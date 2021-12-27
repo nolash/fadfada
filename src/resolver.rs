@@ -3,6 +3,10 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::LowerHex;
 
+use log::debug;
+
+use hex;
+
 pub type Digest = Vec<u8>;
 pub type Signature = Vec<u8>;
 use crate::source;
@@ -63,6 +67,36 @@ pub trait ResolverItem {
     fn pointer(&self) -> String;
 }
 
+pub struct SimpleResolverItem {
+    digest: Digest,
+    src: String,
+}
+
+impl ResolverItem for SimpleResolverItem {
+    fn digest(&self) -> &Digest {
+        return &self.digest;
+    }
+
+    fn pointer(&self) -> String {
+        return self.src.clone();
+    }
+
+    fn signature(&self) -> Result<Signature, ResolverError> {
+        return Err(ResolverError{
+            detail: ErrorDetail::UnknownEngineError("unimplemented".to_string()),
+        });
+    }
+} 
+
+impl SimpleResolverItem {
+    pub fn new(content: String) -> Self{
+        SimpleResolverItem{
+            digest: hex::decode(&content).unwrap(),
+            src: content,
+        }
+    }
+}
+
 
 /// A key-value store of source engine identifiers mapped to `ResolverItem`s.
 ///
@@ -89,6 +123,7 @@ impl<'r> Resolver<'r> {
             let e = ResolverError::new(ErrorDetail::EngineExistsError);
             return Err(e);
         }
+        debug!("added engine {}", e);
         self.resolvers.insert(e, r);
         Ok(())
     }

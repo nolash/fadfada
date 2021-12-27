@@ -1,4 +1,3 @@
-use std::str::FromStr;
 use log::{
     debug,
     info,
@@ -10,6 +9,10 @@ use crate::control::Controller;
 use crate::timing::Scheduler;
 use crate::source::Source;
 use crate::endpoint::Endpoint;
+use crate::resolver::{
+    Resolver,
+    SimpleResolverItem,
+};
 
 use yaml_rust::{
     Yaml,
@@ -132,6 +135,31 @@ impl FromYaml<Controller> for Controller {
         };
 
         return ctrl;
+    }
+}
+
+impl<'a> FromYaml<Resolver<'a>> for Resolver<'a> {
+    fn from_yaml(y: &Hash, schedule_default: Option<&Scheduler>) -> Resolver<'a> {
+        let mut resolver = Resolver::new();
+        //let mut initial = false;
+        let mut items: Vec<(String, String)> = vec![];
+        //let mut first_item: String = "".to_string();
+        y.iter().for_each(|o| {
+            //if !initial {
+                //first_item = o.0.as_str().unwrap().to_string(); 
+                //initial = true;
+            //}
+            let k = o.0.as_str().unwrap();
+            let v = o.1.as_str().unwrap();
+            items.push((k.to_string(), v.to_string()));
+        });
+
+        for item in items {
+            let resolver_item = &SimpleResolverItem::new(item.1);
+            resolver.add(item.0, resolver_item);
+        };
+
+        resolver
     }
 }
 

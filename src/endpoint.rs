@@ -23,7 +23,6 @@ pub struct Endpoint<'a> {
 }
 
 impl<'a> Endpoint<'a> {
-    //pub fn new(protocol: &str, host: Option<String>, port: Option<u16>, path: Option<String>, validator: Option<&dyn Validator>) -> Endpoint<'a> {
     pub fn new(endpoint_url_src: &str, validator: Option<&dyn Validator>) -> Endpoint<'a> {
         let endpoint_url = Url::parse(endpoint_url_src).unwrap();
         Endpoint{
@@ -40,16 +39,6 @@ impl<'a> Endpoint<'a> {
     /// TODO: enforce zero port for schemes that do not have ports associated with them (file)
     pub fn url_for(&self, pointer: &str) -> String {
         let mut pointer_url = self.url.clone();
-        //let pointer_path: String;
-//        match pointer_url.path() {
-//             => {
-//                let new_path = path::Path::new(s)
-//                    .join(pointer);
-//            },
-//            None => {
-//                pointer_path = pointer;
-//            },
-//        }
         let new_path = path::Path::new(self.url.path())
             .join(pointer);
         pointer_url.set_path(new_path.to_str().unwrap());
@@ -70,18 +59,14 @@ mod tests {
 
     #[test]
     fn test_endpoint_create() {
-        //let mut orig_url = Url::parse("https://localhost:8521/foo").unwrap();
         let orig_url = "https://localhost:8521/foo";
-        //let mut e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
         let mut e: Endpoint = Endpoint::new(orig_url, None);
         assert_eq!(format!("{}", e), "https://localhost:8521/foo");
     }
 
     #[test]
     fn test_endpoint_pointer() {
-        //let mut orig_url = Url::parse("https://localhost:8521/foo").unwrap();
         let orig_url = "https://localhost:8521/foo";
-        //let mut e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
         let mut e: Endpoint = Endpoint::new(orig_url, None);
         let endpoint_url = e.url_for("deadbeef");
         assert_eq!(format!("{}", endpoint_url), "https://localhost:8521/foo/deadbeef");
@@ -89,9 +74,7 @@ mod tests {
 
     #[test]
     fn test_endpoint_file() {
-        //let mut orig_url = Url::parse("file:///tmp/foobar").unwrap();
         let orig_url = "file:///tmp/foobar";
-        //let mut e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
         let mut e: Endpoint = Endpoint::new(orig_url, None);
         let endpoint_url = e.url_for("deadbeef");
         assert_eq!(format!("{}", endpoint_url), "file:///tmp/foobar/deadbeef");

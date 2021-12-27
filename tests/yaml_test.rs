@@ -99,7 +99,6 @@ fn test_yaml_source() {
 #[test]
 #[cfg(feature = "yaml")]
 fn test_yaml_controller() {
-
     env_logger::init();
 
     let yaml_src_path = path::Path::new(".")
@@ -126,4 +125,25 @@ fn test_yaml_controller() {
         debug!("element {} {}", v.0, v.1);
         //assert_eq!(v.0, 13);
     });
+}
+
+#[test]
+#[cfg(feature = "yaml")]
+fn test_yaml_resolver() {
+
+    env_logger::init();
+
+    let yaml_src_path = path::Path::new(".")
+        .join("testdata")
+        .join("resolver.yaml");
+
+    let s = fs::read_to_string(&yaml_src_path).unwrap();
+    let y = yaml_from_str(&s);
+
+    let resolver = Resolver::from_yaml(&y, None);
+
+    let engine = "sha256".to_string();
+    let for_foo = resolver.pointer_for(&engine);
+    debug!("for foo {:?}", for_foo);
+    assert_eq!(for_foo.unwrap(), "deadbeef");
 }
