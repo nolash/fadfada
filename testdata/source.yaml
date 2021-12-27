@@ -1,0 +1,10 @@
+sources:
+  - engine: foo
+    schedule:
+      delay: 22
+      timeout: 44
+    endpoints:
+      - url: http://foo.com
+        validator: foov
+      - url: http://bar.com/baz
+        validator: barv

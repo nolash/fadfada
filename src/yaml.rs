@@ -141,14 +141,16 @@ fn yaml_from_str(s: &str) -> Hash {
 
 #[cfg(test)]
 mod tests {
-    use super::Scheduler;
     use log::debug;
     use env_logger;
     use super::yaml_from_str;
     use super::FromYaml;
 
+
     #[test]
     fn test_yaml_scheduler() {
+        use super::Scheduler;
+
         env_logger::init();
         let mut s = "delay: 13 \n\
         timeout: 42 \n\
@@ -184,19 +186,18 @@ timeout: 444 \n\
     fn test_yaml_source() {
         use super::Source;
         use super::Yaml;
+        use std::{
+            path,
+            fs,
+        };
+       
+        let yaml_src_path = path::Path::new(".")
+            .join("testdata")
+            .join("source.yaml");
 
-        let s = "sources:
-\x20\x20- engine: foo
-\x20\x20\x20\x20schedule:
-\x20\x20\x20\x20\x20\x20delay: 22
-\x20\x20\x20\x20\x20\x20timeout: 44
-\x20\x20\x20\x20endpoints:
-\x20\x20\x20\x20\x20\x20- url: http://foo.com
-\x20\x20\x20\x20\x20\x20\x20\x20validator: foo
-\x20\x20\x20\x20\x20\x20- url: https://bar.com/baz
-\x20\x20\x20\x20\x20\x20\x20\x20validator: bar
-";
+        let s = fs::read_to_string(&yaml_src_path).unwrap();
         let y = yaml_from_str(&s);
+
         let mut k = Yaml::from_str("sources");
         let sources_y = y.get(&k).unwrap().as_vec().unwrap();
         let source_y = sources_y[0].as_hash().unwrap();
