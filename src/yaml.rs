@@ -23,24 +23,49 @@ use yaml_rust::scanner::ScanError;
 use url::Url;
 
 trait FromYaml<T> {
-    fn from_yaml(y: &Hash) -> T;
+    fn from_yaml(y: &Hash, schedule: Option<&Scheduler>) -> T;
 }
 
 impl FromYaml<Scheduler> for Scheduler {
-    fn from_yaml(y: &Hash) -> Scheduler {
+    fn from_yaml(y: &Hash, schedule_defaults: Option<&Scheduler>) -> Scheduler {
+        let mut schedule: Scheduler; 
         let mut k = Yaml::from_str("delay");
-        let offset = y.get(&k).unwrap().as_i64().unwrap();
+        let delay = y.get(&k); //.unwrap().as_i64().unwrap();
         k = Yaml::from_str("timeout");
-        let timeout = y.get(&k).unwrap().as_i64().unwrap();
-        Scheduler {
-            timeout: timeout as u32,
-            delay: offset as u32,
-        }
+        let timeout = y.get(&k); //.unwrap().as_i64().unwrap();
+
+        match schedule_defaults {
+            Some(v) => {
+                schedule = (*v).clone();
+            },
+            None => {
+                schedule = Scheduler {
+                    timeout: 0,
+                    delay: 0,
+                };
+            },
+        };
+
+        match delay {
+            Some(v) => {
+                schedule.delay = v.as_i64().unwrap() as u32;
+            },
+            _ => {},
+        };
+
+        match timeout {
+            Some(v) => {
+                schedule.timeout = v.as_i64().unwrap() as u32;
+            },
+            _ => {},
+        };
+
+        return schedule;
     }
 }
 
 impl<'a> FromYaml<Endpoint<'a>> for Endpoint<'a> {
-    fn from_yaml(y: &Hash) -> Endpoint<'a> {
+    fn from_yaml(y: &Hash, schedule_default: Option<&Scheduler>) -> Endpoint<'a> {
         let mut k = Yaml::from_str("url");
         let url_string = y.get(&k).unwrap().as_str().unwrap();
         let endpoint_url = Url::parse(&url_string).unwrap();
@@ -66,7 +91,7 @@ impl<'a> FromYaml<Endpoint<'a>> for Endpoint<'a> {
 }
 
 impl<'a> FromYaml<Source<'a>> for Source<'a> {
-    fn from_yaml(y: &Hash) -> Source<'a> {
+    fn from_yaml(y: &Hash, schedule_default: Option<&Scheduler>) -> Source<'a> {
         let mut k = Yaml::from_str("engine");
         let engine = y.get(&k).unwrap().as_str().unwrap();
         let mut source = Source::new(engine.to_string());
@@ -74,7 +99,7 @@ impl<'a> FromYaml<Source<'a>> for Source<'a> {
         let endpoints = y.get(&k).unwrap().as_vec().unwrap();
         for endpoint_entry in endpoints {
             let endpoint_y = endpoint_entry.as_hash().unwrap();
-            let endpoint = Endpoint::from_yaml(endpoint_y);
+            let endpoint = Endpoint::from_yaml(endpoint_y, schedule_default);
             source.endpoints.push(endpoint);
         }
 
@@ -82,7 +107,7 @@ impl<'a> FromYaml<Source<'a>> for Source<'a> {
         match y.get(&k) {
             Some(schedule_entry) => {
                 let schedule_y = schedule_entry.as_hash().unwrap();
-                source.timing = Some(Scheduler::from_yaml(schedule_y));
+                source.timing = Some(Scheduler::from_yaml(schedule_y, None));
             }, 
             _ => {},
         };
@@ -97,7 +122,7 @@ impl FromStr for Controller {
         match r {
             Ok(y) => {
                 let v = y[0].as_hash().unwrap();
-                let scheduler = Scheduler::from_yaml(&v);
+                let scheduler = Scheduler::from_yaml(&v, None);
                 let ctrl = Controller::new(scheduler);
                 return Ok(ctrl);
             },
@@ -116,8 +141,6 @@ fn yaml_from_str(s: &str) -> Hash {
 
 #[cfg(test)]
 mod tests {
-
-    use std::str::FromStr;
     use super::Scheduler;
     use log::debug;
     use env_logger;
@@ -127,14 +150,34 @@ mod tests {
     #[test]
     fn test_yaml_scheduler() {
         env_logger::init();
-        let s = "delay: 13 \n\
+        let mut s = "delay: 13 \n\
         timeout: 42 \n\
 ";
 
-        let y = yaml_from_str(&s);
-        let scheduler = Scheduler::from_yaml(&y);
+        let mut y = yaml_from_str(&s);
+        let mut scheduler = Scheduler::from_yaml(&y, None);
         assert_eq!(scheduler.delay, 13);
         assert_eq!(scheduler.timeout, 42);
+
+        s = "delay: 111\n";
+        y = yaml_from_str(&s);
+        let mut scheduler_overridden = Scheduler::from_yaml(&y, Some(&scheduler));
+        assert_eq!(scheduler_overridden.delay, 111);
+        assert_eq!(scheduler_overridden.timeout, 42);
+
+        s = "timeout: 222\n";
+        y = yaml_from_str(&s);
+        scheduler_overridden = Scheduler::from_yaml(&y, Some(&scheduler));
+        assert_eq!(scheduler_overridden.delay, 13);
+        assert_eq!(scheduler_overridden.timeout, 222);
+
+        s = "delay: 333 \n\
+timeout: 444 \n\
+";
+        y = yaml_from_str(&s);
+        scheduler_overridden = Scheduler::from_yaml(&y, Some(&scheduler));
+        assert_eq!(scheduler_overridden.delay, 333);
+        assert_eq!(scheduler_overridden.timeout, 444);
     }
 
     #[test]
@@ -157,9 +200,10 @@ mod tests {
         let mut k = Yaml::from_str("sources");
         let sources_y = y.get(&k).unwrap().as_vec().unwrap();
         let source_y = sources_y[0].as_hash().unwrap();
-        let source = Source::from_yaml(&source_y);
+        let source = Source::from_yaml(&source_y, None);
         
         let source_timing = source.timing.unwrap();
         assert_eq!(source_timing.delay, 22);
+        assert_eq!(source_timing.timeout, 44);
     }
 }
