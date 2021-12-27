@@ -36,5 +36,8 @@ pub mod control;
 #[cfg(feature = "web2")]
 pub mod web2;
 
+#[cfg(feature = "yaml")]
+pub mod yaml;
+
 #[cfg(test)]
 pub mod mock;
