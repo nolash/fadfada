@@ -77,6 +77,15 @@ impl<'a> FromYaml<Source<'a>> for Source<'a> {
             let endpoint = Endpoint::from_yaml(endpoint_y);
             source.endpoints.push(endpoint);
         }
+
+        k = Yaml::from_str("schedule");
+        match y.get(&k) {
+            Some(schedule_entry) => {
+                let schedule_y = schedule_entry.as_hash().unwrap();
+                source.timing = Some(Scheduler::from_yaml(schedule_y));
+            }, 
+            _ => {},
+        };
         return source;
     }
 }
@@ -129,12 +138,15 @@ mod tests {
     }
 
     #[test]
-    fn test_yaml_resolver() {
+    fn test_yaml_source() {
         use super::Source;
         use super::Yaml;
 
         let s = "sources:
 \x20\x20- engine: foo
+\x20\x20\x20\x20schedule:
+\x20\x20\x20\x20\x20\x20delay: 22
+\x20\x20\x20\x20\x20\x20timeout: 44
 \x20\x20\x20\x20endpoints:
 \x20\x20\x20\x20\x20\x20- url: http://foo.com
 \x20\x20\x20\x20\x20\x20\x20\x20validator: foo
@@ -146,5 +158,8 @@ mod tests {
         let sources_y = y.get(&k).unwrap().as_vec().unwrap();
         let source_y = sources_y[0].as_hash().unwrap();
         let source = Source::from_yaml(&source_y);
+        
+        let source_timing = source.timing.unwrap();
+        assert_eq!(source_timing.delay, 22);
     }
 }
