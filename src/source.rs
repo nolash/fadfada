@@ -23,6 +23,17 @@ pub struct Source<'a> {
     pub engine: Engine,
 }
 
+impl<'a> Source<'a> {
+    pub fn new(engine: Engine) -> Self {
+        Source {
+            trusted_keys: vec![],
+            endpoints: vec![],
+            timing: None,
+            engine: engine,
+        }
+    }
+}
+
 //#[cfg(test)]
 //mod tests {
 //    use super::Source;
