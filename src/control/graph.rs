@@ -1,6 +1,7 @@
 use std::fmt;
 use std::collections::HashMap;
 
+use log::debug;
 
 /// Represents the sequence and timings of a single resource request as described by the
 /// [super:control.Controller] state at the time of request.
@@ -22,20 +23,37 @@ impl ControllerGraph {
     /// Add a new offset/url pair to the graph.
     pub fn add(&mut self, d: u64, e: String) {
         let mut r: bool = false;
+        let offset = self.find_next_offset(d);
         //let mut offset: u64 = d * 1000;
-        let mut offset = d;
+//        let mut offset = d;
+//
+//        while r {
+//            match self.v.entry(offset) {
+//                x => {
+//                    offset += 1;
+//                },
+//                _ => {
+//                   r = false;
+//                },
+//            }
+//        }
+       
+        debug!("using offset {} (requested {}) for {}", offset, d, e);
+        self.v.insert(offset, e);
+    }
 
-        while r {
-            match self.v.entry(offset) {
-                x => {
+    fn find_next_offset(&self, offset_default: u64) -> u64 {
+        let mut offset = offset_default;
+        loop {
+            match self.v.get(&offset) {
+                Some(v) => {
                     offset += 1;
                 },
-                _ => {
-                   r = false;
-                },
+                None => {
+                    return offset;
+                }
             }
         }
-        self.v.insert(offset, e);
     }
 }
 

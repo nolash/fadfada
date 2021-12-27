@@ -1,6 +1,10 @@
+use std::fmt;
+
 use super::keystore::{Fingerprint};
 use super::timing::{Scheduler};
 use super::endpoint::{Endpoint};
+
+use log::error;
 
 /// The [Engine] is use as a lookup key for resources for a particular [Source] backend.
 ///
@@ -31,6 +35,22 @@ impl<'a> Source<'a> {
             timing: None,
             engine: engine,
         }
+    }
+}
+
+impl<'a> fmt::Debug for Source<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::write(f, format_args!("registering source engine {}", self.engine))
+//        self.endpoints.iter().for_each(|endpoint| {
+//            let r = fmt::write(f, format_args!("source engine {} registered endpoint {}", self.engine, endpoint));
+//            match r {
+//                Err(e) => {
+//                    error!("debug render error for source engine {}", self.engine);
+//                },
+//                _ => {},
+//            }
+//        });
+//        Ok(())
     }
 }
 

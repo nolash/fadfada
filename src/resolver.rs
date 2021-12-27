@@ -124,7 +124,7 @@ mod tests {
     use crate::mock::{TestResolverItem};
 
     #[test]
-    fn create_resolver() {
+    fn test_resolver_create() {
         let key_one: Vec<u8> = vec![1, 2, 3];
         let key_two: Vec<u8> = vec![4, 5, 6];
         let mut r: Resolver = Resolver::new();

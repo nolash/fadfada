@@ -100,27 +100,33 @@ impl<'a> FromYaml<Source<'a>> for Source<'a> {
                 let schedule_y = schedule_entry.as_hash().unwrap();
                 source.timing = Some(Scheduler::from_yaml(schedule_y, None));
             }, 
-            _ => {},
+            _ => {
+                source.timing = Some(schedule_default.unwrap().clone());
+            },
         };
         return source;
     }
 }
 
-impl FromStr for Controller {
-    type Err = ScanError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let r = YamlLoader::load_from_str(s);
-        match r {
-            Ok(y) => {
-                let v = y[0].as_hash().unwrap();
-                let scheduler = Scheduler::from_yaml(&v, None);
-                let ctrl = Controller::new(scheduler);
-                return Ok(ctrl);
+impl FromYaml<Controller> for Controller {
+    fn from_yaml(y: &Hash, schedule_default: Option<&Scheduler>) -> Controller {
+        let schedule = Scheduler::from_yaml(y, schedule_default);
+
+        let mut ctrl = Controller::new(schedule.clone()); //.clone());
+
+        let mut k = Yaml::from_str("sources");
+        match y.get(&k) {
+            Some(sources_entry) => {
+                for source_entry in sources_entry.as_vec().unwrap() {
+                    let source_y = source_entry.as_hash().unwrap();
+                    let source = Source::from_yaml(source_y, Some(&schedule));
+                    ctrl.add(source);
+                }
             },
-            Err(e) => {
-                return Err(e);
-            }
-        }
+            _ => {},
+        };
+
+        return ctrl;
     }
 }
 

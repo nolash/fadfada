@@ -1,5 +1,7 @@
 use std::fmt;
 
+use log::debug;
+
 use crate::source::Source;
 use crate::timing::Scheduler;
 use crate::endpoint::Endpoint;
@@ -50,6 +52,7 @@ impl Controller {
                 self.offsets.push(0);
             },
         }
+        debug!("controller added source {:?}", source);
         self.sources.push(source);
     }
 
@@ -57,6 +60,7 @@ impl Controller {
     pub fn generate(&mut self, resolver: Resolver) -> ControllerGraph {
         let mut g: ControllerGraph = ControllerGraph::new();
         self.sources.iter().enumerate().for_each(|(i, s)| {
+            debug!("processing source {:?}", s);
             s.endpoints.iter().enumerate().for_each(|(j, e)| {
                 let mut offset: u32 = self.offsets[i] as u32;
                 match &s.timing {
@@ -72,7 +76,9 @@ impl Controller {
         });
         g 
     }
+
 }
+
 
 //impl fmt::Display for Controller {
 //    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
