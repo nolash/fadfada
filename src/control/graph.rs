@@ -24,19 +24,6 @@ impl ControllerGraph {
     pub fn add(&mut self, d: u64, e: String) {
         let mut r: bool = false;
         let offset = self.find_next_offset(d);
-        //let mut offset: u64 = d * 1000;
-//        let mut offset = d;
-//
-//        while r {
-//            match self.v.entry(offset) {
-//                x => {
-//                    offset += 1;
-//                },
-//                _ => {
-//                   r = false;
-//                },
-//            }
-//        }
        
         debug!("using offset {} (requested {}) for {}", offset, d, e);
         self.v.insert(offset, e);

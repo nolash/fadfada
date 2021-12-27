@@ -68,14 +68,8 @@ impl<'a> FromYaml<Endpoint<'a>> for Endpoint<'a> {
     fn from_yaml(y: &Hash, schedule_default: Option<&Scheduler>) -> Endpoint<'a> {
         let mut k = Yaml::from_str("url");
         let url_string = y.get(&k).unwrap().as_str().unwrap();
-        let endpoint_url = Url::parse(&url_string).unwrap();
-
-        let mut endpoint_url_port: u16 = endpoint_url.port_or_known_default().unwrap();
         Endpoint::new(
-            endpoint_url.scheme(),
-            endpoint_url.host_str().unwrap(),
-            &endpoint_url_port,
-            Some(endpoint_url.path()),
+            url_string,
             None,
             )
     }
@@ -101,7 +95,18 @@ impl<'a> FromYaml<Source<'a>> for Source<'a> {
                 source.timing = Some(Scheduler::from_yaml(schedule_y, None));
             }, 
             _ => {
-                source.timing = Some(schedule_default.unwrap().clone());
+                match schedule_default {
+                    Some(v) => {
+                        source.timing = Some(v.clone());
+                    },
+                    None => {
+                        let scheduler_fallback = Scheduler {
+                            delay: 0,
+                            timeout: 0,
+                        };
+                        source.timing = Some(scheduler_fallback);
+                    },
+                };
             },
         };
         return source;

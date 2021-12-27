@@ -1,10 +1,6 @@
 delay: 13
 timeout: 42
 sources:
-  - engine: bar
-    endpoints:
-      - url: https://xyzzy.net
-        validator: 12r12
   - engine: foo
     schedule:
       delay: 22
@@ -14,4 +10,6 @@ sources:
         validator: foov
       - url: https://bar.com/baz
         validator: barv
-  
+  - engine: bar
+    endpoints:
+      - url: https://xyzzy.net

@@ -24,8 +24,7 @@ version = "~0.9"
 
 [dependencies.url]
 version = "~2.2.2"
-optional = true
 
 [features]
 web2 = []
-yaml = ["yaml-rust", "url"]
+yaml = ["yaml-rust"]

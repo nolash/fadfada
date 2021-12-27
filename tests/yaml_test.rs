@@ -10,6 +10,7 @@ use log::{
     error,
 };
 
+#[cfg(feature = "yaml")]
 use yaml_rust::Yaml;
 
 use fadafada::timing::Scheduler;
@@ -17,6 +18,8 @@ use fadafada::source::Source;
 use fadafada::endpoint::Endpoint;
 use fadafada::control::Controller;
 use fadafada::resolver::Resolver;
+
+#[cfg(feature = "yaml")]
 use fadafada::yaml::{
     yaml_from_str,
     FromYaml,
@@ -28,8 +31,6 @@ use mock::TestResolverItem;
 #[test]
 #[cfg(feature= "yaml")]
 fn test_yaml_scheduler() {
-
-    env_logger::init();
     let mut s = "delay: 13 \n\
     timeout: 42 \n\
 ";
@@ -71,7 +72,7 @@ fn test_yaml_endpoint() {
     let y = yaml_from_str(&s);
     let endpoint = Endpoint::from_yaml(&y, None);
     let resource = "deadbeef".to_string();
-    assert_eq!(endpoint.url_for(&resource), "https://foo.com:443/deadbeef");
+    assert_eq!(endpoint.url_for(&resource), "https://foo.com/deadbeef");
 }
 
 #[test]
