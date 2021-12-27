@@ -8,7 +8,7 @@ use fadafada::resolver::Resolver;
 
 #[test]
 #[cfg(feature = "web2")]
-fn create_graph() {
+fn test_web2_create_graph() {
 
     use fadafada::web2::Sha256ImmutableResolverItem;
 

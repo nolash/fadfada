@@ -6,5 +6,5 @@ sources:
     endpoints:
       - url: http://foo.com
         validator: foov
-      - url: http://bar.com/baz
+      - url: https://bar.com/baz
         validator: barv

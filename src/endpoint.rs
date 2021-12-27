@@ -24,7 +24,7 @@ pub struct Endpoint<'a> {
 }
 
 impl<'a> Endpoint<'a> {
-    pub  fn new(protocol: &str, host: &str, port: &u16, path: Option<&str>, validator: Option<&dyn Validator>) -> Endpoint<'a> {
+    pub fn new(protocol: &str, host: &str, port: &u16, path: Option<&str>, validator: Option<&dyn Validator>) -> Endpoint<'a> {
         let mut e: Endpoint = Endpoint{
             protocol: String::from(protocol),
             host: String::from(host),
@@ -46,9 +46,9 @@ impl<'a> Endpoint<'a> {
     /// The endpoint will typically be the string representation of a digest.
     ///
     /// TODO: pointer should probably be of [Digest](crate::resolver::Digest), or a dedicated type for reference,
-    pub fn url_for(&self, pointer: &String) -> String {
+    pub fn url_for(&self, pointer: &str) -> String {
         match &self.path {
-            x if x.is_empty() => {
+            x if x.is_empty() || x == "/" => {
                 format!("{}://{}:{}/{}", self.protocol, self.host, self.port, pointer)
             },
             _ => {
@@ -61,7 +61,6 @@ impl<'a> Endpoint<'a> {
 impl<'a> fmt::Display for Endpoint<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.path {
-            //Some(ref v) => {
             ref v if self.path.len() > 0 => { 
                 fmt::write(f, format_args!("{}://{}:{}/{}", self.protocol, self.host, self.port, v));
             },
@@ -76,15 +75,24 @@ impl<'a> fmt::Display for Endpoint<'a> {
 #[cfg(test)]
 mod tests {
     use super::Endpoint;
-    use crate::resolver::Resolver;
 
     #[test]
-    fn create() {
-        let key: Vec<u8> = Vec::new();
-        let content: Vec<u8> = Vec::new();
-        let r: Resolver = Resolver::new();
+    fn test_endpoint_create() {
         let p: u16 = 8080;
-        let e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
+
+        let mut e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
         assert_eq!(format!("{}", e), "https://localhost:8080/foo");
+
+        e = Endpoint::new("https", "localhost", &p, None, None);
+        assert_eq!(format!("{}", e), "https://localhost:8080");
+    }
+
+    #[test]
+    fn test_endpoint_url() {
+        let p: u16 = 8080;
+
+        let e: Endpoint = Endpoint::new("https", "localhost", &p, Some("foo"), None);
+        let url = e.url_for("deadbeef");
+        assert_eq!(format!("{}", url), "https://localhost:8080/foo/deadbeef");
     }
 }
