@@ -12,9 +12,6 @@ fn test_web2_create_graph() {
 
     use fadafada::web2::Sha256ImmutableResolverItem;
 
-    // port number
-    let p: u16 = 443;
-
     // set up first source with endpoints and schedule
     let endpoint_a_one: Endpoint = Endpoint::new("https://foo.com:443", None);
     let endpoint_a_two: Endpoint = Endpoint::new("https://bar.com:443/baz", None);
@@ -57,10 +54,10 @@ fn test_web2_create_graph() {
     let mut resolver = Resolver::new();
 
     let ri_one = Sha256ImmutableResolverItem::new(&key_one, None);
-    resolver.add("foo".to_string(), Box::new(ri_one));
+    let mut _r = resolver.add("foo".to_string(), Box::new(ri_one));
 
     let ri_two = Sha256ImmutableResolverItem::new(&key_two, None); 
-    resolver.add("bar".to_string(), Box::new(ri_two));
+    _r = resolver.add("bar".to_string(), Box::new(ri_two));
 
     let g = c.generate(resolver);
 

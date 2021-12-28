@@ -164,7 +164,7 @@ mod tests {
     fn test_resolver_create() {
         let key_one: Vec<u8> = vec![1, 2, 3];
         let key_two: Vec<u8> = vec![4, 5, 6];
-        let mut r: Resolver = Resolver::new();
+        let mut resolver: Resolver = Resolver::new();
         let ri_one = TestResolverItem{key: key_one}; //vec![1,2,3]};
         let ri_two = TestResolverItem{key: key_two}; //vec![4,5,6]};
         let engine_string_one: source::Engine = "one".to_string();
@@ -172,13 +172,13 @@ mod tests {
         let ri_orig_one = ri_one.digest().clone();
         let ri_orig_two = ri_two.digest().clone();
 
-        r.add(engine_string_one.clone(), Box::new(ri_one));
-        r.add(engine_string_two.clone(), Box::new(ri_two));
+        let mut _r = resolver.add(engine_string_one.clone(), Box::new(ri_one));
+        _r = resolver.add(engine_string_two.clone(), Box::new(ri_two));
 
-        let mut ri_returned = r.pointer_for(&engine_string_one).unwrap();
+        let mut ri_returned = resolver.pointer_for(&engine_string_one).unwrap();
         assert_eq!(hex::encode(ri_orig_one), ri_returned);
 
-        ri_returned = r.pointer_for(&engine_string_two).unwrap();
+        ri_returned = resolver.pointer_for(&engine_string_two).unwrap();
         assert_eq!(hex::encode(ri_orig_two), ri_returned);
     }
 }

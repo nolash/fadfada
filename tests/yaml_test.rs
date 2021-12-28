@@ -5,9 +5,6 @@ use std::{
 
 use log::{
     debug,
-    info,
-    warn,
-    error,
 };
 
 #[cfg(feature = "yaml")]
@@ -36,7 +33,7 @@ fn test_yaml_scheduler() {
 ";
 
     let mut y = yaml_from_str(&s);
-    let mut scheduler = Scheduler::from_yaml(&y, None);
+    let scheduler = Scheduler::from_yaml(&y, None);
     assert_eq!(scheduler.delay, 13);
     assert_eq!(scheduler.timeout, 42);
 
@@ -85,7 +82,7 @@ fn test_yaml_source() {
     let s = fs::read_to_string(&yaml_src_path).unwrap();
     let y = yaml_from_str(&s);
 
-    let mut k = Yaml::from_str("sources");
+    let k = Yaml::from_str("sources");
     let sources_y = y.get(&k).unwrap().as_vec().unwrap();
     let source_y = sources_y[0].as_hash().unwrap();
     let source = Source::from_yaml(&source_y, None);
@@ -112,11 +109,11 @@ fn test_yaml_controller() {
     let resolver_item_foo = TestResolverItem{
         key: vec![1, 2, 3],
     };
-    resolver.add("foo".to_string(), Box::new(resolver_item_foo));
+    let mut _r = resolver.add("foo".to_string(), Box::new(resolver_item_foo));
     let resolver_item_bar = TestResolverItem{
         key: vec![4, 5, 6],
     };
-    resolver.add("bar".to_string(), Box::new(resolver_item_bar));
+    _r = resolver.add("bar".to_string(), Box::new(resolver_item_bar));
 
     let ctrl_graph = ctrl.generate(resolver);
     ctrl_graph.for_each(|v| {
