@@ -20,10 +20,18 @@ pub struct Sha256ImmutableResolverItem {
     pub content: Option<Vec<u8>>,
 }
 
+impl Sha256ImmutableResolverItem {
+    pub fn new(key: &Vec<u8>, content: Option<Vec<u8>>) -> Self {
+        Sha256ImmutableResolverItem{
+            key: key.clone(),
+            content: content,
+        }
+    }
+}
+
 impl ResolverItem for Sha256ImmutableResolverItem {
     fn digest(&self) -> &Digest {
         return &self.key;
-        //Ok(Vec::new())     
     }
     fn signature(&self) -> Result<Digest, ResolverError> {
         Ok(Vec::new())     

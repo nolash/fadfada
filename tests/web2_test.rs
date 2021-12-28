@@ -16,9 +16,7 @@ fn test_web2_create_graph() {
     let p: u16 = 443;
 
     // set up first source with endpoints and schedule
-    //let endpoint_a_one: Endpoint = Endpoint::new("https", "foo.com", &p, None, None);
     let endpoint_a_one: Endpoint = Endpoint::new("https://foo.com:443", None);
-    //let endpoint_a_two: Endpoint = Endpoint::new("https", "bar.com", &p, Some("baz"), None);
     let endpoint_a_two: Endpoint = Endpoint::new("https://bar.com:443/baz", None);
     let sched_a: Scheduler = Scheduler {
         delay: 20,
@@ -32,7 +30,6 @@ fn test_web2_create_graph() {
     };
 
     // set up second source with endpoints and schedule
-    //let endpoint_b_one: Endpoint = Endpoint::new("http", "xyzzy.com", &p, None, None);
     let endpoint_b_one: Endpoint = Endpoint::new("http://xyzzy.com", None);
     let sched_b: Scheduler = Scheduler {
         delay: 10,
@@ -59,10 +56,10 @@ fn test_web2_create_graph() {
     let key_two: Vec<u8> = vec![4, 5, 6];
     let mut resolver = Resolver::new();
 
-    let ri_one = Sha256ImmutableResolverItem{key: key_one, content: None};
+    let ri_one = Sha256ImmutableResolverItem::new(&key_one, None);
     resolver.add("foo".to_string(), Box::new(ri_one));
 
-    let ri_two = Sha256ImmutableResolverItem{key: key_two, content: None};
+    let ri_two = Sha256ImmutableResolverItem::new(&key_two, None); 
     resolver.add("bar".to_string(), Box::new(ri_two));
 
     let g = c.generate(resolver);
