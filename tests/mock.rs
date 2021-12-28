@@ -1,7 +1,6 @@
 use hex;
 
 use fadafada::resolver::{
-        Resolver,
         ResolverItem,
         ResolverError,
         Digest,

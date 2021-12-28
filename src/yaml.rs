@@ -1,15 +1,11 @@
-use std::str::FromStr;
-use log::{
-    debug,
-    info,
-    warn,
-    error,
-};
-
 use crate::control::Controller;
 use crate::timing::Scheduler;
 use crate::source::Source;
 use crate::endpoint::Endpoint;
+use crate::resolver::{
+    Resolver,
+    SimpleResolverItem,
+};
 
 use yaml_rust::{
     Yaml,
@@ -18,9 +14,6 @@ use yaml_rust::{
 use yaml_rust::yaml::{
     Hash,
 };
-use yaml_rust::scanner::ScanError;
-
-use url::Url;
 
 pub trait FromYaml<T> {
     fn from_yaml(y: &Hash, schedule: Option<&Scheduler>) -> T;
@@ -65,8 +58,8 @@ impl FromYaml<Scheduler> for Scheduler {
 }
 
 impl<'a> FromYaml<Endpoint<'a>> for Endpoint<'a> {
-    fn from_yaml(y: &Hash, schedule_default: Option<&Scheduler>) -> Endpoint<'a> {
-        let mut k = Yaml::from_str("url");
+    fn from_yaml(y: &Hash, _schedule_default: Option<&Scheduler>) -> Endpoint<'a> {
+        let k = Yaml::from_str("url");
         let url_string = y.get(&k).unwrap().as_str().unwrap();
         Endpoint::new(
             url_string,
@@ -119,7 +112,7 @@ impl FromYaml<Controller> for Controller {
 
         let mut ctrl = Controller::new(schedule.clone()); //.clone());
 
-        let mut k = Yaml::from_str("sources");
+        let k = Yaml::from_str("sources");
         match y.get(&k) {
             Some(sources_entry) => {
                 for source_entry in sources_entry.as_vec().unwrap() {
@@ -135,6 +128,31 @@ impl FromYaml<Controller> for Controller {
     }
 }
 
+impl FromYaml<Resolver> for Resolver {
+    fn from_yaml(y: &Hash, _schedule_default: Option<&Scheduler>) -> Resolver {
+        let mut resolver = Resolver::new();
+        //let mut initial = false;
+        let mut items: Vec<(String, String)> = vec![];
+        //let mut first_item: String = "".to_string();
+        y.iter().for_each(|o| {
+            //if !initial {
+                //first_item = o.0.as_str().unwrap().to_string(); 
+                //initial = true;
+            //}
+            let k = o.0.as_str().unwrap();
+            let v = o.1.as_str().unwrap();
+            items.push((k.to_string(), v.to_string()));
+        });
+
+        for item in items {
+            let resolver_item = SimpleResolverItem::new(item.1);
+            let _r = resolver.add(item.0, Box::new(resolver_item));
+        };
+
+        resolver
+    }
+}
+
 pub fn yaml_from_str(s: &str) -> Hash {
     let yaml_docs = YamlLoader::load_from_str(s).unwrap();
     let y = yaml_docs[0].as_hash().unwrap();
@@ -143,8 +161,6 @@ pub fn yaml_from_str(s: &str) -> Hash {
 
 #[cfg(test)]
 mod tests {
-    use log::debug;
-    use env_logger;
     use super::yaml_from_str;
     use yaml_rust::{
         Yaml,
@@ -158,7 +174,7 @@ bar: \n\
 \x20\x20- two \n\
 ";
         let y = yaml_from_str(s);
-        let mut k = Yaml::from_str("bar");
+        let k = Yaml::from_str("bar");
 
         let r = y.get(&k).unwrap().as_vec().unwrap();
         assert_eq!(r.len(), 2);

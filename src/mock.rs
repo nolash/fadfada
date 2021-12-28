@@ -1,6 +1,5 @@
 use hex;
 use crate::resolver::{
-        Resolver,
         ResolverItem,
         ResolverError,
         Digest,

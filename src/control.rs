@@ -1,10 +1,7 @@
-use std::fmt;
-
 use log::debug;
 
 use crate::source::Source;
 use crate::timing::Scheduler;
-use crate::endpoint::Endpoint;
 use crate::resolver::Resolver;
 
 pub mod graph;

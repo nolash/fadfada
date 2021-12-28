@@ -22,7 +22,6 @@ impl ControllerGraph {
 
     /// Add a new offset/url pair to the graph.
     pub fn add(&mut self, d: u64, e: String) {
-        let mut r: bool = false;
         let offset = self.find_next_offset(d);
        
         debug!("using offset {} (requested {}) for {}", offset, d, e);
@@ -33,7 +32,7 @@ impl ControllerGraph {
         let mut offset = offset_default;
         loop {
             match self.v.get(&offset) {
-                Some(v) => {
+                Some(_) => {
                     offset += 1;
                 },
                 None => {
@@ -71,12 +70,12 @@ impl Iterator for ControllerGraph {
 }
 
 impl fmt::Display for ControllerGraph {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result { //Result<(), fmt::Error> {
         // consider tradeoffs against BtreeMap; which is faster for a single sort?
         self.it.iter().for_each(|v| {
                match Some(v) {
                    Some(k) => {
-                       write!(f, "{} {}\n", k, self.v.get(k).unwrap()); 
+                       let _r = fmt::write(f, format_args!("{} {:?}\n", k, self.v.get(k))); 
                    },
                    None => {},
                }

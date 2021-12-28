@@ -1,7 +1,9 @@
 use std::fmt;
 use std::collections::HashMap;
-use std::error::Error;
-use std::fmt::LowerHex;
+
+use log::debug;
+
+use hex;
 
 pub type Digest = Vec<u8>;
 pub type Signature = Vec<u8>;
@@ -31,7 +33,14 @@ impl ResolverError {
 
 impl fmt::Display for ResolverError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Resolver error display")
+        match &self.detail {
+            ErrorDetail::EngineExistsError => {
+                return fmt::write(f, format_args!("Resolver error display"));
+            },
+            ErrorDetail::UnknownEngineError(_e) => {
+                return fmt::write(f, format_args!("Resolver error display"));
+            },
+        };
     }
 }
 
@@ -63,19 +72,49 @@ pub trait ResolverItem {
     fn pointer(&self) -> String;
 }
 
+pub struct SimpleResolverItem {
+    digest: Digest,
+    src: String,
+}
+
+impl ResolverItem for SimpleResolverItem {
+    fn digest(&self) -> &Digest {
+        return &self.digest;
+    }
+
+    fn pointer(&self) -> String {
+        return self.src.clone();
+    }
+
+    fn signature(&self) -> Result<Signature, ResolverError> {
+        return Err(ResolverError{
+            detail: ErrorDetail::UnknownEngineError("unimplemented".to_string()),
+        });
+    }
+} 
+
+impl SimpleResolverItem {
+    pub fn new(content: String) -> Self{
+        SimpleResolverItem{
+            digest: hex::decode(&content).unwrap(),
+            src: content,
+        }
+    }
+}
+
 
 /// A key-value store of source engine identifiers mapped to `ResolverItem`s.
 ///
 /// If an [source::Engine] to `ResolverItem` mapping exists for a specific resource, then the corresponding
 /// `Source` object for that `Engine` will use the digest returned to complete the request using
 /// the associated `Endpoint` objects.
-pub struct Resolver<'r> {
-    resolvers: HashMap<source::Engine, &'r ResolverItem>,
+pub struct Resolver {
+    resolvers: HashMap<source::Engine, Box<dyn ResolverItem>>,
 }
 
 
-impl<'r> Resolver<'r> {
-    pub fn new() -> Resolver<'r> {
+impl Resolver {
+    pub fn new() -> Resolver {
         Resolver {
             resolvers: HashMap::new(),
         }
@@ -84,11 +123,12 @@ impl<'r> Resolver<'r> {
     /// Register a [ResolverItem] for an [source::Engine].
     /// 
     /// Will error if a record for [source::Engine] already exists.
-    pub fn add(&mut self, e: source::Engine, r: &'r ResolverItem) -> Result<(), ResolverError> {
+    pub fn add(&mut self, e: source::Engine, r: Box<dyn ResolverItem>) -> Result<(), ResolverError> {
         if self.resolvers.contains_key(&e) {
             let e = ResolverError::new(ErrorDetail::EngineExistsError);
             return Err(e);
         }
+        debug!("added engine {}", e);
         self.resolvers.insert(e, r);
         Ok(())
     }
@@ -116,9 +156,6 @@ mod tests {
     use super::{
         Resolver,
         ResolverItem,
-        ResolverError,
-        Digest,
-        Signature,
     };
     use crate::source;
     use crate::mock::{TestResolverItem};
@@ -127,20 +164,21 @@ mod tests {
     fn test_resolver_create() {
         let key_one: Vec<u8> = vec![1, 2, 3];
         let key_two: Vec<u8> = vec![4, 5, 6];
-        let mut r: Resolver = Resolver::new();
-        let ri_one = TestResolverItem{key: vec![1,2,3]};
-        let ri_two = TestResolverItem{key: vec![4,5,6]};
+        let mut resolver: Resolver = Resolver::new();
+        let ri_one = TestResolverItem{key: key_one}; //vec![1,2,3]};
+        let ri_two = TestResolverItem{key: key_two}; //vec![4,5,6]};
         let engine_string_one: source::Engine = "one".to_string();
         let engine_string_two: source::Engine = "two".to_string();
-        r.add(engine_string_one.clone(), &ri_one);
-        r.add(engine_string_two.clone(), &ri_two);
+        let ri_orig_one = ri_one.digest().clone();
+        let ri_orig_two = ri_two.digest().clone();
 
-        let mut ri_returned = r.pointer_for(&engine_string_one).unwrap();
-        let mut ri_orig = ri_one.digest();
-        assert_eq!(hex::encode(ri_orig), ri_returned);
+        let mut _r = resolver.add(engine_string_one.clone(), Box::new(ri_one));
+        _r = resolver.add(engine_string_two.clone(), Box::new(ri_two));
 
-        ri_returned = r.pointer_for(&engine_string_two).unwrap();
-        ri_orig = ri_two.digest();
-        assert_eq!(hex::encode(ri_orig), ri_returned);
+        let mut ri_returned = resolver.pointer_for(&engine_string_one).unwrap();
+        assert_eq!(hex::encode(ri_orig_one), ri_returned);
+
+        ri_returned = resolver.pointer_for(&engine_string_two).unwrap();
+        assert_eq!(hex::encode(ri_orig_two), ri_returned);
     }
 }

@@ -9,11 +9,11 @@ pub trait Validator {
 }
 
 pub struct Sha256ImmutableValidator<'r> {
-    pub resolver: &'r Resolver<'r>,
+    pub resolver: &'r Resolver,
 }
 
 impl<'a> Validator for Sha256ImmutableValidator<'a> {
-    fn verify(&self, digest: &Digest, signature: &Signature) -> bool {
+    fn verify(&self, _digest: &Digest, _signature: &Signature) -> bool {
         true
     }
 }
@@ -23,9 +23,9 @@ pub struct NoopValidator {
 }
 
 impl Validator for NoopValidator {
-    fn verify(&self, digest: &Digest, signature: &Signature) -> bool {
+    fn verify(&self, _digest: &Digest, _signature: &Signature) -> bool {
         true
     }
 }
 
-pub const noopValidator: NoopValidator = NoopValidator{};
+pub const NOOPVALIDATOR: NoopValidator = NoopValidator{};
