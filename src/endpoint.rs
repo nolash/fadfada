@@ -4,7 +4,7 @@ use std::{
 };
 use crate::validator::{
     Validator,
-    noopValidator,
+    NOOPVALIDATOR,
 };
 
 use url::Url;
@@ -23,11 +23,11 @@ pub struct Endpoint<'a> {
 }
 
 impl<'a> Endpoint<'a> {
-    pub fn new(endpoint_url_src: &str, validator: Option<&dyn Validator>) -> Endpoint<'a> {
+    pub fn new(endpoint_url_src: &str, _validator: Option<&dyn Validator>) -> Endpoint<'a> {
         let endpoint_url = Url::parse(endpoint_url_src).unwrap();
         Endpoint{
             url: endpoint_url,
-            validator: &noopValidator,
+            validator: &NOOPVALIDATOR,
         }        
     }
 
@@ -55,19 +55,18 @@ impl<'a> fmt::Display for Endpoint<'a> {
 #[cfg(test)]
 mod tests {
     use super::Endpoint;
-    use url::Url;
 
     #[test]
     fn test_endpoint_create() {
         let orig_url = "https://localhost:8521/foo";
-        let mut e: Endpoint = Endpoint::new(orig_url, None);
+        let e: Endpoint = Endpoint::new(orig_url, None);
         assert_eq!(format!("{}", e), "https://localhost:8521/foo");
     }
 
     #[test]
     fn test_endpoint_pointer() {
         let orig_url = "https://localhost:8521/foo";
-        let mut e: Endpoint = Endpoint::new(orig_url, None);
+        let e: Endpoint = Endpoint::new(orig_url, None);
         let endpoint_url = e.url_for("deadbeef");
         assert_eq!(format!("{}", endpoint_url), "https://localhost:8521/foo/deadbeef");
     }
@@ -75,7 +74,7 @@ mod tests {
     #[test]
     fn test_endpoint_file() {
         let orig_url = "file:///tmp/foobar";
-        let mut e: Endpoint = Endpoint::new(orig_url, None);
+        let e: Endpoint = Endpoint::new(orig_url, None);
         let endpoint_url = e.url_for("deadbeef");
         assert_eq!(format!("{}", endpoint_url), "file:///tmp/foobar/deadbeef");
     }

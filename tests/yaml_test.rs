@@ -99,8 +99,6 @@ fn test_yaml_source() {
 #[test]
 #[cfg(feature = "yaml")]
 fn test_yaml_controller() {
-    env_logger::init();
-
     let yaml_src_path = path::Path::new(".")
         .join("testdata")
         .join("source.yaml");
@@ -114,11 +112,11 @@ fn test_yaml_controller() {
     let resolver_item_foo = TestResolverItem{
         key: vec![1, 2, 3],
     };
-    resolver.add("foo".to_string(), &resolver_item_foo);
+    resolver.add("foo".to_string(), Box::new(resolver_item_foo));
     let resolver_item_bar = TestResolverItem{
         key: vec![4, 5, 6],
     };
-    resolver.add("bar".to_string(), &resolver_item_bar);
+    resolver.add("bar".to_string(), Box::new(resolver_item_bar));
 
     let ctrl_graph = ctrl.generate(resolver);
     ctrl_graph.for_each(|v| {

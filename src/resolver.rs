@@ -1,7 +1,5 @@
 use std::fmt;
 use std::collections::HashMap;
-use std::error::Error;
-use std::fmt::LowerHex;
 
 use log::debug;
 
@@ -35,7 +33,14 @@ impl ResolverError {
 
 impl fmt::Display for ResolverError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Resolver error display")
+        match &self.detail {
+            ErrorDetail::EngineExistsError => {
+                return fmt::write(f, format_args!("Resolver error display"));
+            },
+            ErrorDetail::UnknownEngineError(_e) => {
+                return fmt::write(f, format_args!("Resolver error display"));
+            },
+        };
     }
 }
 
@@ -103,13 +108,13 @@ impl SimpleResolverItem {
 /// If an [source::Engine] to `ResolverItem` mapping exists for a specific resource, then the corresponding
 /// `Source` object for that `Engine` will use the digest returned to complete the request using
 /// the associated `Endpoint` objects.
-pub struct Resolver<'r> {
-    resolvers: HashMap<source::Engine, &'r ResolverItem>,
+pub struct Resolver {
+    resolvers: HashMap<source::Engine, Box<dyn ResolverItem>>,
 }
 
 
-impl<'r> Resolver<'r> {
-    pub fn new() -> Resolver<'r> {
+impl Resolver {
+    pub fn new() -> Resolver {
         Resolver {
             resolvers: HashMap::new(),
         }
@@ -118,7 +123,7 @@ impl<'r> Resolver<'r> {
     /// Register a [ResolverItem] for an [source::Engine].
     /// 
     /// Will error if a record for [source::Engine] already exists.
-    pub fn add(&mut self, e: source::Engine, r: &'r ResolverItem) -> Result<(), ResolverError> {
+    pub fn add(&mut self, e: source::Engine, r: Box<dyn ResolverItem>) -> Result<(), ResolverError> {
         if self.resolvers.contains_key(&e) {
             let e = ResolverError::new(ErrorDetail::EngineExistsError);
             return Err(e);
@@ -151,9 +156,6 @@ mod tests {
     use super::{
         Resolver,
         ResolverItem,
-        ResolverError,
-        Digest,
-        Signature,
     };
     use crate::source;
     use crate::mock::{TestResolverItem};
@@ -163,19 +165,20 @@ mod tests {
         let key_one: Vec<u8> = vec![1, 2, 3];
         let key_two: Vec<u8> = vec![4, 5, 6];
         let mut r: Resolver = Resolver::new();
-        let ri_one = TestResolverItem{key: vec![1,2,3]};
-        let ri_two = TestResolverItem{key: vec![4,5,6]};
+        let ri_one = TestResolverItem{key: key_one}; //vec![1,2,3]};
+        let ri_two = TestResolverItem{key: key_two}; //vec![4,5,6]};
         let engine_string_one: source::Engine = "one".to_string();
         let engine_string_two: source::Engine = "two".to_string();
-        r.add(engine_string_one.clone(), &ri_one);
-        r.add(engine_string_two.clone(), &ri_two);
+        let ri_orig_one = ri_one.digest().clone();
+        let ri_orig_two = ri_two.digest().clone();
+
+        r.add(engine_string_one.clone(), Box::new(ri_one));
+        r.add(engine_string_two.clone(), Box::new(ri_two));
 
         let mut ri_returned = r.pointer_for(&engine_string_one).unwrap();
-        let mut ri_orig = ri_one.digest();
-        assert_eq!(hex::encode(ri_orig), ri_returned);
+        assert_eq!(hex::encode(ri_orig_one), ri_returned);
 
         ri_returned = r.pointer_for(&engine_string_two).unwrap();
-        ri_orig = ri_two.digest();
-        assert_eq!(hex::encode(ri_orig), ri_returned);
+        assert_eq!(hex::encode(ri_orig_two), ri_returned);
     }
 }

@@ -138,8 +138,8 @@ impl FromYaml<Controller> for Controller {
     }
 }
 
-impl<'a> FromYaml<Resolver<'a>> for Resolver<'a> {
-    fn from_yaml(y: &Hash, schedule_default: Option<&Scheduler>) -> Resolver<'a> {
+impl FromYaml<Resolver> for Resolver {
+    fn from_yaml(y: &Hash, schedule_default: Option<&Scheduler>) -> Resolver {
         let mut resolver = Resolver::new();
         //let mut initial = false;
         let mut items: Vec<(String, String)> = vec![];
@@ -155,8 +155,8 @@ impl<'a> FromYaml<Resolver<'a>> for Resolver<'a> {
         });
 
         for item in items {
-            let resolver_item = &SimpleResolverItem::new(item.1);
-            resolver.add(item.0, resolver_item);
+            let resolver_item = SimpleResolverItem::new(item.1);
+            resolver.add(item.0, Box::new(resolver_item));
         };
 
         resolver
