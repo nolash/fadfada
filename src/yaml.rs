@@ -131,14 +131,8 @@ impl FromYaml<Controller> for Controller {
 impl FromYaml<Resolver> for Resolver {
     fn from_yaml(y: &Hash, _schedule_default: Option<&Scheduler>) -> Resolver {
         let mut resolver = Resolver::new();
-        //let mut initial = false;
         let mut items: Vec<(String, String)> = vec![];
-        //let mut first_item: String = "".to_string();
         y.iter().for_each(|o| {
-            //if !initial {
-                //first_item = o.0.as_str().unwrap().to_string(); 
-                //initial = true;
-            //}
             let k = o.0.as_str().unwrap();
             let v = o.1.as_str().unwrap();
             items.push((k.to_string(), v.to_string()));
