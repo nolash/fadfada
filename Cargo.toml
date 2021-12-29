@@ -25,6 +25,10 @@ version = "^0.9"
 [dependencies.url]
 version = "^2.2"
 
+[dependencies.sha2]
+version = "^0.10"
+optional = true
+
 [features]
-web2 = []
+web2 = ["sha2"]
 yaml = ["yaml-rust"]

@@ -1,10 +1,17 @@
+use log::debug;
+use hex;
+use sha2::{Sha256, Digest};
+
 use crate::source::{Engine};
 use crate::resolver::{
     ResolverItem,
-    Digest,
+    Digest as ResolverDigest,
+    Signature,
     ResolverError,
 };
-use hex;
+use crate::validator::{
+    Validator,
+};
 
 pub fn engine() -> Engine {
     return "web2".to_string();
@@ -30,10 +37,10 @@ impl Sha256ImmutableResolverItem {
 }
 
 impl ResolverItem for Sha256ImmutableResolverItem {
-    fn digest(&self) -> &Digest {
+    fn digest(&self) -> &ResolverDigest {
         return &self.key;
     }
-    fn signature(&self) -> Result<Digest, ResolverError> {
+    fn signature(&self) -> Result<ResolverDigest, ResolverError> {
         Ok(Vec::new())     
     }
     fn pointer(&self) -> String {
@@ -41,3 +48,25 @@ impl ResolverItem for Sha256ImmutableResolverItem {
         return hex::encode(v);
     }
 }
+
+pub struct Sha256ImmutableValidator {}
+
+    impl Validator for Sha256ImmutableValidator {
+        fn verify(&self, digest: &ResolverDigest, content: Option<&Vec<u8>>, _signature: Option<&Signature>) -> bool {
+            let mut r = false;
+
+            match content {
+                Some(v) => {
+                    let mut h = Sha256::new();
+                    h.update(v);
+                    let z = h.finalize();
+                    r = digest.as_slice() == z.as_slice();
+                },
+                _ => { 
+                    r = true;
+                },
+            };
+            r
+        }
+    }
+
