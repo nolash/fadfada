@@ -10,11 +10,9 @@ pub trait Validator {
     fn verify(&self, digest: &Digest, content: Option<&Vec<u8>>, signature: Option<&Signature>) -> bool;
 }
 
-pub struct Sha256ImmutableValidator<'r> {
-    pub resolver: &'r Resolver,
-}
+pub struct Sha256ImmutableValidator {}
 
-impl<'a> Validator for Sha256ImmutableValidator<'a> {
+impl Validator for Sha256ImmutableValidator {
     fn verify(&self, digest: &Digest, _content: Option<&Vec<u8>>, _signature: Option<&Signature>) -> bool {
         debug!("verifying digest {:?}", digest);
         true
