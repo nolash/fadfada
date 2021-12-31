@@ -1,6 +1,9 @@
 use log::debug;
 
-use super::resolver::{Resolver, Digest, Signature};
+use super::resolver::{
+    Digest,
+    Signature,
+};
 
 /// The [Validator] is optionally used with a result from a [Source](crate:.source::Source) to verify the origin of
 /// content.

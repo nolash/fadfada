@@ -1,4 +1,5 @@
 use log::debug;
+
 use hex;
 use sha2::{Sha256, Digest};
 
@@ -53,7 +54,7 @@ pub struct Sha256ImmutableValidator {}
 
     impl Validator for Sha256ImmutableValidator {
         fn verify(&self, digest: &ResolverDigest, content: Option<&Vec<u8>>, _signature: Option<&Signature>) -> bool {
-            let mut r = false;
+            let r: bool;
 
             match content {
                 Some(v) => {
@@ -61,9 +62,11 @@ pub struct Sha256ImmutableValidator {}
                     h.update(v);
                     let z = h.finalize();
                     r = digest.as_slice() == z.as_slice();
+                    debug!("verify sha256 digest {:?}: {}", digest, r);
                 },
                 _ => { 
                     r = true;
+                    debug!("no content for sha256 verify digest {:?}", digest);
                 },
             };
             r

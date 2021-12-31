@@ -115,7 +115,7 @@ fn test_yaml_controller() {
     };
     _r = resolver.add("bar".to_string(), Box::new(resolver_item_bar));
 
-    let ctrl_graph = ctrl.generate(resolver);
+    let ctrl_graph = ctrl.generate(&resolver);
     ctrl_graph.for_each(|v| {
         debug!("element {} {}", v.0, v.1);
         //assert_eq!(v.0, 13);

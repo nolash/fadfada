@@ -3,10 +3,13 @@ use std::collections::HashMap;
 
 use log::debug;
 
+use crate::endpoint::Endpoint;
+use crate::source::Engine;
+
 /// Represents the sequence and timings of a single resource request as described by the
 /// [super:control.Controller] state at the time of request.
 pub struct ControllerGraph {
-    v: HashMap<u64, String>,
+    v: HashMap<u64, (String, Engine)>,
     it: Vec<u64>,
     it_active: bool,
 }
@@ -21,11 +24,12 @@ impl ControllerGraph {
     }
 
     /// Add a new offset/url pair to the graph.
-    pub fn add(&mut self, d: u64, e: String) {
+    //pub fn add(&mut self, d: u64, e: String) {
+    pub fn add(&mut self, d: u64, engine: &Engine, pointer_url: String) { 
         let offset = self.find_next_offset(d);
        
-        debug!("using offset {} (requested {}) for {}", offset, d, e);
-        self.v.insert(offset, e);
+        debug!("using offset {} (requested {}) for {}", offset, d, pointer_url);
+        self.v.insert(offset, (pointer_url, engine.clone()));
     }
 
     fn find_next_offset(&self, offset_default: u64) -> u64 {
@@ -44,9 +48,9 @@ impl ControllerGraph {
 }
 
 impl Iterator for ControllerGraph {
-    type Item = (u64, String);
+    type Item = (u64, String, Engine);
 
-    fn next(&mut self) -> Option<(u64, String)> {
+    fn next(&mut self) -> Option<(u64, String, Engine)> {
         if !self.it_active {
             self.it = Vec::<u64>::new();
             for k in self.v.keys() {
@@ -59,7 +63,7 @@ impl Iterator for ControllerGraph {
         match self.it.pop() {
             Some(i) => {
                 let s = self.v.get(&i).unwrap();
-                Some((i, s.clone()))
+                Some((i, s.0.clone(), s.1.clone()))
             },
             None => {
                 self.it_active = false;

@@ -54,7 +54,7 @@ impl Controller {
     }
 
     /// Generate a [ControllerGraph] from the current state of the [Controller].
-    pub fn generate(&mut self, resolver: Resolver) -> ControllerGraph {
+    pub fn generate(&mut self, resolver: &Resolver) -> ControllerGraph {
         let mut g: ControllerGraph = ControllerGraph::new();
         self.sources.iter().enumerate().for_each(|(i, s)| {
             debug!("processing source {:?}", s);
@@ -64,7 +64,8 @@ impl Controller {
                     Some(x) => {
                         let pointer = resolver.pointer_for(&s.engine).unwrap();
                         offset += x.delay * (j as u32);
-                        g.add(offset as u64, e.url_for(&pointer));
+                        let pointer_url = e.url_for(&pointer);
+                        g.add(offset as u64, &s.engine, pointer_url); //.url_for(&pointer));
                     },
                     None => {},
                 }

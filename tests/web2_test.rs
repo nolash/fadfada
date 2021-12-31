@@ -59,7 +59,7 @@ fn test_web2_create_graph() {
     let ri_two = Sha256ImmutableResolverItem::new(&key_two, None); 
     _r = resolver.add("bar".to_string(), Box::new(ri_two));
 
-    let g = c.generate(resolver);
+    let g = c.generate(&resolver);
 
     for v in g {
         println!(">> {:?}", v);
