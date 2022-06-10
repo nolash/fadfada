@@ -17,9 +17,9 @@ use graph::ControllerGraph;
 /// Once a controller has been populated, it can be used to generate [ControllerGraph] instances,
 /// which in turn can be used with a query engine to control the execution of a single query.
 pub struct Controller {
-    sources: Vec<Source<'static>>,
+    pub sources: Vec<Source<'static>>,
     timing: Scheduler,
-    offsets: Vec<u32>,
+    pub offsets: Vec<u32>,
 }
 
 impl Controller {

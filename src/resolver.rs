@@ -14,9 +14,8 @@ use crate::source;
 /// resolver package.
 pub enum ErrorDetail {
     EngineExistsError,
-    UnknownEngineError(String),
+    UnknownEngineError,
 }
-
 
 /// ResolverError encapsulates any error raised within the resolver package.
 pub struct ResolverError {
@@ -24,7 +23,7 @@ pub struct ResolverError {
 }
 
 impl ResolverError {
-    fn new(e: ErrorDetail) -> ResolverError {
+    pub fn new(e: ErrorDetail) -> ResolverError {
         ResolverError {
             detail: e,
         } 
@@ -37,7 +36,7 @@ impl fmt::Display for ResolverError {
             ErrorDetail::EngineExistsError => {
                 return fmt::write(f, format_args!("Resolver error display"));
             },
-            ErrorDetail::UnknownEngineError(_e) => {
+            ErrorDetail::UnknownEngineError => {
                 return fmt::write(f, format_args!("Resolver error display"));
             },
         };
@@ -88,13 +87,13 @@ impl ResolverItem for SimpleResolverItem {
 
     fn signature(&self) -> Result<Signature, ResolverError> {
         return Err(ResolverError{
-            detail: ErrorDetail::UnknownEngineError("unimplemented".to_string()),
+            detail: ErrorDetail::UnknownEngineError,
         });
     }
 } 
 
 impl SimpleResolverItem {
-    pub fn new(content: String) -> Self{
+    pub fn new(content: String) -> SimpleResolverItem {
         SimpleResolverItem{
             digest: hex::decode(&content).unwrap(),
             src: content,
@@ -142,7 +141,7 @@ impl Resolver {
                 Ok(x.pointer())
             },
             None => {
-                let err_detail = ErrorDetail::UnknownEngineError(e.to_string());
+                let err_detail = ErrorDetail::UnknownEngineError;
                 let err = ResolverError::new(err_detail);
                 return Err(err);
             },
@@ -162,6 +161,7 @@ mod tests {
 
     #[test]
     fn test_resolver_create() {
+        env_logger::init();
         let key_one: Vec<u8> = vec![1, 2, 3];
         let key_two: Vec<u8> = vec![4, 5, 6];
         let mut resolver: Resolver = Resolver::new();
