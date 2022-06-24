@@ -1,16 +1,16 @@
-#![crate_name = "fadafada"]
+#![crate_name = "fadfada"]
 
-//! fadafada generates URL request graphs for different types of content sources.
+//! fadfada generates URL request graphs for different types of content sources.
 //!
 //! Its primary use-case is bridging the dependency problem between web2 and web3 resources, enabling the
 //! client to specify sources from multiple protocol backends, to be tried at particular offsets in
 //! time.
 //!
-//! The `fadafada` package is agnostic about what backend types is uses, and can just as well be used 
+//! The `fadfada` package is agnostic about what backend types is uses, and can just as well be used 
 //! to fetch a resource from a list of web2 mirrors.
 //!
-//! The execution of `fadafada` is described by registering resources and schedules with the
-//! `fadafada::control::Controller` object.
+//! The execution of `fadfada` is described by registering resources and schedules with the
+//! `fadfada::control::Controller` object.
 
 /// A single endpoint in a source structure.
 pub mod endpoint;
