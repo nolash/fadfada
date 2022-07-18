@@ -1,8 +1,9 @@
 [package]
-name = "fadafada"
+name = "fadfada"
 version = "0.0.1-alpha.1"
 authors = ["nolash <dev@holbrook.no>"]
 edition = "2018"
+rust-version = "1.56"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

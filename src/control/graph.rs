@@ -10,6 +10,7 @@ use crate::source::Engine;
 /// [super:control.Controller] state at the time of request.
 pub struct ControllerGraph {
     v: HashMap<u64, (String, Engine)>,
+    l: usize,
     it: Vec<u64>,
     it_active: bool,
 }
@@ -20,6 +21,7 @@ impl ControllerGraph {
             v: HashMap::new(),
             it: Vec::<u64>::new(),
             it_active: false,
+            l: 0,
         }
     }
 
@@ -30,9 +32,25 @@ impl ControllerGraph {
        
         debug!("using offset {} (requested {}) for {}", offset, d, pointer_url);
         self.v.insert(offset, (pointer_url, engine.clone()));
+        self.l += 1;
     }
 
-    fn find_next_offset(&self, offset_default: u64) -> u64 {
+    pub fn len(&self) -> usize {
+        self.l
+    }
+
+    pub fn keys(&mut self) -> Vec<u64> {
+        self.fill_it();
+        self.it.clone()
+    }
+
+    pub fn get(&self, i: usize) -> (u64, String, Engine) {
+        let k = self.it[i];
+        let v = &self.v[&k];
+        (k, v.0.clone(), v.1.clone())
+    }
+
+    pub fn find_next_offset(&self, offset_default: u64) -> u64 {
         let mut offset = offset_default;
         loop {
             match self.v.get(&offset) {
@@ -45,6 +63,15 @@ impl ControllerGraph {
             }
         }
     }
+    
+    fn fill_it(&mut self) {
+        self.it = Vec::<u64>::new();
+        for k in self.v.keys() {
+            self.it.push(*k);
+        }
+        self.it.sort();
+        self.it.reverse();
+    }
 }
 
 impl Iterator for ControllerGraph {
@@ -52,12 +79,7 @@ impl Iterator for ControllerGraph {
 
     fn next(&mut self) -> Option<(u64, String, Engine)> {
         if !self.it_active {
-            self.it = Vec::<u64>::new();
-            for k in self.v.keys() {
-                self.it.push(*k);
-            }
-            self.it.sort();
-            self.it.reverse();
+            self.fill_it();
             self.it_active = true;
         }
         match self.it.pop() {
