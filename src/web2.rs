@@ -52,24 +52,23 @@ impl ResolverItem for Sha256ImmutableResolverItem {
 
 pub struct Sha256ImmutableValidator {}
 
-    impl Validator for Sha256ImmutableValidator {
-        fn verify(&self, digest: &ResolverDigest, content: Option<&Vec<u8>>, _signature: Option<&Signature>) -> bool {
-            let r: bool;
+impl Validator for Sha256ImmutableValidator {
+    fn verify(&self, digest: &ResolverDigest, content: Option<&Vec<u8>>, _signature: Option<&Signature>) -> bool {
+        let r: bool;
 
-            match content {
-                Some(v) => {
-                    let mut h = Sha256::new();
-                    h.update(v);
-                    let z = h.finalize();
-                    r = digest.as_slice() == z.as_slice();
-                    debug!("verify sha256 digest {:?}: {}", digest, r);
-                },
-                _ => { 
-                    r = true;
-                    debug!("no content for sha256 verify digest {:?}", digest);
-                },
-            };
-            r
-        }
+        match content {
+            Some(v) => {
+                let mut h = Sha256::new();
+                h.update(v);
+                let z = h.finalize();
+                r = digest.as_slice() == z.as_slice();
+                debug!("verify sha256 digest {:?}: {}", digest, r);
+            },
+            _ => { 
+                r = true;
+                debug!("no content for sha256 verify digest {:?}", digest);
+            },
+        };
+        r
     }
-
+}

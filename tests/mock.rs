@@ -1,6 +1,6 @@
 use hex;
 
-use fadafada::resolver::{
+use fadfada::resolver::{
         ResolverItem,
         ResolverError,
         Digest,

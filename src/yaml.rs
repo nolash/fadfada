@@ -1,3 +1,57 @@
+//! This optional module provides the convenience of defining contents and sources in yaml
+//! documents, and automatically generating the
+//! [ControllerGraph](crate::control::graph::ControllerGraph) from them.
+//!
+//! To generate a graph, two separate documents are required, the `control` document and the
+//! `contents` document.
+//!
+//! # control
+//!
+//! This document specifies the scheduling and the network locations for each retrieval engine.
+//!
+//! To illustrate with an example:
+//!
+//! ``` ignore,
+//! delay: 200
+//! timeout: 4000
+//! sources:
+//!   - engine: foo
+//!     endpoints:
+//!       - url: http://one.foo.com
+//!       - url: http://two.foo.com/foo
+//!   - engine: bar
+//!     endpoints:
+//!       - url: http://only.bar.com
+//! ```
+//!
+//! This results in requests for each engine fired 200 ms apart, where the request for the "bar"
+//! engine is fired slightly after [^persched] the first request for the "foo" engine, resulting in something
+//! like:
+//! 
+//! * after 0 ms: http://one.foo.com
+//! * after 1 ms: http://only.bar.com
+//! * after 200 ms: http://two.foo.com
+//!
+//! [^persched]: The ability to define per-engine offsets and schedules is intended but not yet implemented.
+//!
+//! # content
+//!
+//! The content file defines the reference for the content for every engine to be requested.
+//!
+//! The format is:
+//!
+//! ``` ignore,
+//! foo: deadbeef
+//! bar: beeffeed
+//! ```
+//!
+//! Mapping this content with the engines defined in the control document from
+//! the previous paragraph, the resulting query graph becomes:
+//!
+//! * after 0 ms: http://one.foo.com/deadbeef
+//! * after 1 ms: http://only.bar.com/beeffeed
+//! * after 200 ms: http://two.foo.com/deadbeef
+
 use crate::control::Controller;
 use crate::timing::Scheduler;
 use crate::source::Source;

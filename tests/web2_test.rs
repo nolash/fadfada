@@ -1,16 +1,16 @@
-extern crate fadafada;
+extern crate fadfada;
 
-use fadafada::source::Source;
-use fadafada::control::Controller;
-use fadafada::timing::Scheduler;
-use fadafada::endpoint::Endpoint;
-use fadafada::resolver::Resolver;
+use fadfada::source::Source;
+use fadfada::control::Controller;
+use fadfada::timing::Scheduler;
+use fadfada::endpoint::Endpoint;
+use fadfada::resolver::Resolver;
 
 #[test]
 #[cfg(feature = "web2")]
 fn test_web2_create_graph() {
 
-    use fadafada::web2::Sha256ImmutableResolverItem;
+    use fadfada::web2::Sha256ImmutableResolverItem;
 
     // set up first source with endpoints and schedule
     let endpoint_a_one: Endpoint = Endpoint::new("https://foo.com:443", None);

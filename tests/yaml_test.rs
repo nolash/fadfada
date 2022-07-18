@@ -10,14 +10,14 @@ use log::{
 #[cfg(feature = "yaml")]
 use yaml_rust::Yaml;
 
-use fadafada::timing::Scheduler;
-use fadafada::source::Source;
-use fadafada::endpoint::Endpoint;
-use fadafada::control::Controller;
-use fadafada::resolver::Resolver;
+use fadfada::timing::Scheduler;
+use fadfada::source::Source;
+use fadfada::endpoint::Endpoint;
+use fadfada::control::Controller;
+use fadfada::resolver::Resolver;
 
 #[cfg(feature = "yaml")]
-use fadafada::yaml::{
+use fadfada::yaml::{
     yaml_from_str,
     FromYaml,
 };
